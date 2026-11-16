@@ -1,0 +1,8 @@
+{# 9.1 Marca: ícono scan-line en cuadrado primario + texto #}
+<span class="flex items-center gap-2.5">
+  <span class="flex size-8 flex-none items-center justify-center rounded-md {% if invertida %}bg-white/15{% else %}bg-primary{% endif %} text-white">{% lucide "scan-line" size=18 %}</span>
+  <span class="leading-tight {% if colapsable %}max-lg:hidden{% endif %}">
+    <span class="block text-base font-bold {% if invertida %}text-white{% else %}text-text{% endif %}">FotoPapeleta</span>
+    <span class="block text-xs font-medium {% if invertida %}text-white/80{% else %}text-text-muted{% endif %}">Inteligente</span>
+  </span>
+</span>

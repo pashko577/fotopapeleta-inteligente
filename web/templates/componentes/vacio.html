@@ -1,0 +1,7 @@
+{# 8.5 EmptyState: ícono en círculo de 72 px, título h3, descripción y acción opcional #}
+<div class="flex flex-col items-center px-6 py-12 text-center">
+  <span class="flex size-[72px] items-center justify-center rounded-full {{ fondo|default:'bg-surface-muted' }} {{ color|default:'text-text-muted' }}">{% lucide icono|default:"inbox" size=36 %}</span>
+  <h3 class="mt-4 text-base font-semibold">{{ titulo }}</h3>
+  {% if texto %}<p class="mt-1 max-w-sm text-text-secondary">{{ texto }}</p>{% endif %}
+  {% if accion_url %}<a href="{{ accion_url }}" class="btn btn-secondary mt-5">{% if accion_icono %}{% lucide accion_icono size=16 %}{% endif %}{{ accion_texto }}</a>{% endif %}
+</div>

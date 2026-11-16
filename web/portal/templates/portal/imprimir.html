@@ -1,0 +1,54 @@
+{% load static %}<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Papeleta {{ p.numero }}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <style>@page { size: A4; margin: 16mm; } @media print { .no-imprimir { display: none !important; } body { background: #fff; } }</style>
+</head>
+<body class="bg-bg text-text" onload="setTimeout(() => window.print(), 300)">
+  <div class="mx-auto max-w-[760px] bg-surface p-8">
+    <div class="no-imprimir mb-6 flex justify-end gap-2">
+      <a href="{% url 'portal:detalle' p.numero %}" class="btn btn-secondary">Volver</a>
+      <button onclick="window.print()" class="btn btn-primary">Imprimir o guardar como PDF</button>
+    </div>
+    <header class="flex items-start justify-between border-b-2 border-text pb-4">
+      {% include "componentes/marca.html" %}
+      <div class="text-right">
+        <p class="rotulo text-text-secondary">Foto-papeleta</p>
+        <p class="font-mono text-xl font-bold">{{ p.numero }}</p>
+        <p class="text-xs text-text-secondary">Emitida el {{ p.emitida|fecha_hora }} · Estado: {{ p.get_estado_display }}</p>
+      </div>
+    </header>
+    <section class="mt-6 flex items-center gap-6">
+      {% placa_grande p.placa "lg" %}
+      <div>
+        <p class="text-lg font-semibold">{{ inf.tipo|nombre_tipo }}</p>
+        <p class="text-text-secondary">Infracción {{ inf.codigo }}</p>
+      </div>
+    </section>
+    <table class="mt-6 w-full text-[13px]">
+      <tbody class="[&_td]:border-b [&_td]:border-border [&_td]:py-2">
+        <tr><td class="w-48 text-text-secondary">Fecha y hora</td><td class="font-mono">{{ capturas.0.timestamp|fecha_hora }}</td></tr>
+        <tr><td class="text-text-secondary">Lugar</td><td>{% for c in capturas %}{{ c.camara.nombre }} ({{ c.camara_id }}, {{ c.timestamp|hora }}){% if not forloop.last %} → {% endif %}{% endfor %}</td></tr>
+        {% if analisis %}
+        <tr><td class="text-text-secondary">Ruta mínima (A*)</td><td class="font-mono">{{ analisis.ruta|join:" → " }} · {{ analisis.km|num }} km</td></tr>
+        <tr><td class="text-text-secondary">Tiempo entre capturas</td><td class="font-mono">{{ analisis.segundos|duracion }} + {{ analisis.error_reloj_s|num:0 }} s × 2 de margen</td></tr>
+        <tr><td class="text-text-secondary">Velocidad conservadora</td><td class="font-mono">{{ analisis.v_conservadora|num }} km/h (medida {{ analisis.v_medida|num }} km/h)</td></tr>
+        <tr><td class="text-text-secondary">Límite / exceso</td><td class="font-mono">{{ analisis.limite|num:0 }} km/h / +{{ analisis.exceso|num }} km/h (tolerancia {{ analisis.tolerancia_kmh|num:0 }} km/h)</td></tr>
+        <tr><td class="text-text-secondary">Versión del grafo</td><td class="font-mono">{{ analisis.version_grafo }}</td></tr>
+        {% endif %}
+        <tr><td class="text-text-secondary">Validada por</td><td>{{ aprobacion.validador|nombre_corto }} · {{ aprobacion.fecha|fecha_hora }}</td></tr>
+      </tbody>
+    </table>
+    <div class="mt-6 grid grid-cols-2 gap-4">
+      {% for c, url in miniaturas %}{% if url %}
+        <figure><img src="{{ url }}" alt="Captura en {{ c.camara_id }}" class="aspect-video w-full rounded-lg object-cover">
+          <figcaption class="mt-1 font-mono text-xs text-text-secondary">{{ c.camara_id }} · {{ c.timestamp|fecha_hora }}</figcaption></figure>
+      {% endif %}{% endfor %}
+    </div>
+    <p class="mt-8 text-xs text-text-secondary">Puede solicitar la revisión de esta papeleta en el portal ciudadano, desde su detalle. Proyecto académico UTP — documento de demostración sin valor legal.</p>
+  </div>
+</body>
+</html>

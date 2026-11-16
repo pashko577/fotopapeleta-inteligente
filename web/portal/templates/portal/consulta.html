@@ -1,0 +1,64 @@
+{% extends "portal/base_portal.html" %}
+{% block contenido %}
+<section class="bg-surface">
+  <div class="mx-auto flex max-w-[960px] flex-col items-center px-4 py-12 text-center md:py-20">
+    <span class="mb-5 inline-flex items-center gap-1.5 rounded-full bg-primary-subtle px-3 py-1 text-xs font-semibold text-primary-text">{% lucide "shield-check" size=14 %} Toda papeleta es revisada por una persona antes de emitirse</span>
+    <h1 class="text-[28px] leading-tight font-bold tracking-tight md:text-4xl">Consulta tus foto-papeletas</h1>
+    <p class="mt-3 max-w-[640px] text-base text-text-secondary">Ingresa la placa de tu vehículo para ver las infracciones registradas, la evidencia de cada una y su estado.</p>
+
+    {# PlacaInput: alto 56, mono 24, mayúsculas, botón integrado #}
+    <form action="{% url 'portal:resultados' %}" method="get" class="mt-8 w-full max-w-[640px]" x-data="{ placa: '{{ placa|default:''|escapejs }}' }"
+          @submit="$store.historial.agregar(placa.toUpperCase())">
+      <label for="placa" class="sr-only">Placa del vehículo</label>
+      <div class="flex flex-col gap-3 rounded-xl border bg-surface p-2 shadow-elev-2 sm:flex-row sm:items-center {% if error %}border-danger{% else %}border-border-strong{% endif %}">
+        <div class="flex flex-1 items-center gap-3 px-3">
+          <span class="text-text-muted">{% lucide "search" size=24 %}</span>
+          <input id="placa" name="placa" x-model="placa" required autocomplete="off" autocapitalize="characters" maxlength="8" placeholder="ABC-123"
+                 class="h-12 w-full bg-transparent font-mono text-2xl font-semibold tracking-[0.08em] uppercase placeholder:text-text-muted/60 focus:outline-none"
+                 aria-describedby="ayuda-placa" {% if error %}aria-invalid="true"{% endif %} autofocus>
+        </div>
+        <button class="btn btn-primary btn-lg w-full sm:w-auto">{% lucide "search" size=18 %} Consultar</button>
+      </div>
+      {% if error %}<p class="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-danger" role="alert">{% lucide "circle-x" size=16 %} {{ error }}</p>{% endif %}
+      <p id="ayuda-placa" class="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-text-secondary">
+        <span class="inline-flex items-center gap-1.5">{% lucide "info" size=14 %} Formato: ABC-123</span>
+        <span class="inline-flex items-center gap-1.5">{% lucide "lock" size=14 %} Consulta gratuita y sin registro</span>
+        <span class="inline-flex items-center gap-1.5">{% lucide "user-check" size=14 %} Validada por una persona</span>
+      </p>
+    </form>
+  </div>
+</section>
+
+<section class="border-t border-border">
+  <div class="mx-auto max-w-[1120px] px-4 py-12 md:py-16">
+    <p class="rotulo text-center text-primary-text">Cómo se genera una papeleta</p>
+    <h2 class="mt-2 text-center text-[22px] font-semibold md:text-[28px]">Evidencia trazable de principio a fin</h2>
+    <ol class="mt-10 grid gap-8 md:grid-cols-4 md:gap-6">
+      <li class="flex gap-4 md:flex-col">
+        <div class="flex items-center gap-4"><span class="flex size-12 flex-none items-center justify-center rounded-full border border-border bg-surface text-primary-text">{% lucide "cctv" size=22 %}</span><span class="h-px flex-1 bg-border-strong max-md:hidden"></span></div>
+        <div><h3 class="text-base font-semibold">1. Detección</h3><p class="mt-1.5 text-text-secondary">Una cámara registra el vehículo y lee su placa con visión por computadora.</p></div>
+      </li>
+      <li class="flex gap-4 md:flex-col">
+        <div class="flex items-center gap-4"><span class="flex size-12 flex-none items-center justify-center rounded-full border border-border bg-surface text-primary-text">{% lucide "waypoints" size=22 %}</span><span class="h-px flex-1 bg-border-strong max-md:hidden"></span></div>
+        <div><h3 class="text-base font-semibold">2. Análisis en la red</h3><p class="mt-1.5 text-text-secondary">El sistema busca la misma placa en otras cámaras y reconstruye la ruta.</p></div>
+      </li>
+      <li class="flex gap-4 md:flex-col">
+        <div class="flex items-center gap-4"><span class="flex size-12 flex-none items-center justify-center rounded-full bg-primary text-white">{% lucide "shield-check" size=22 %}</span><span class="h-px flex-1 bg-border-strong max-md:hidden"></span></div>
+        <div><h3 class="text-base font-semibold">3. Validación humana</h3><p class="mt-1.5 text-text-secondary">Un validador revisa la evidencia y aprueba o rechaza la infracción.</p></div>
+      </li>
+      <li class="flex gap-4 md:flex-col">
+        <div class="flex items-center gap-4"><span class="flex size-12 flex-none items-center justify-center rounded-full border border-border bg-surface text-primary-text">{% lucide "file-check" size=22 %}</span></div>
+        <div><h3 class="text-base font-semibold">4. Emisión y consulta</h3><p class="mt-1.5 text-text-secondary">La papeleta se emite y queda disponible aquí con toda su evidencia.</p></div>
+      </li>
+    </ol>
+    <div class="mt-12 flex flex-col gap-4 rounded-lg border-l-4 border-info bg-info-subtle p-4 sm:flex-row sm:items-center">
+      <span class="text-info">{% lucide "message-square" size=22 %}</span>
+      <div class="flex-1">
+        <p class="font-semibold">¿No estás de acuerdo con una papeleta?</p>
+        <p class="text-text-secondary">Desde el detalle de cada papeleta puedes solicitar una revisión. Respondemos en un plazo de 7 días hábiles.</p>
+      </div>
+      <a href="{% url 'portal:ayuda' %}" class="btn btn-secondary">{% lucide "circle-question-mark" size=16 %} Saber más</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

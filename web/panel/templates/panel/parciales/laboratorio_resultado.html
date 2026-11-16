@@ -1,0 +1,54 @@
+<section class="card card-pad">
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h2 class="text-xl font-semibold">{% if r.ok %}{{ r.titulo }}{% elif r %}Sin resultado{% else %}Red de cámaras{% endif %}</h2>
+      <p class="font-mono text-xs text-text-secondary">{% if r.ok %}{{ r.resumen }} · {{ r.ms|floatformat:3 }} ms{% else %}Elige un algoritmo y presiona «Ejecutar»{% endif %}</p>
+    </div>
+    {% if r.ok %}<span class="inline-flex items-center gap-1.5 rounded-full bg-success-subtle px-2.5 py-1 text-xs font-semibold text-success">{% lucide "circle-check" size=14 %} {% if r.costo is None %}Vecindario encontrado{% else %}Ruta encontrada{% endif %}</span>{% endif %}
+  </div>
+  {% if r and not r.ok %}
+    <div class="mt-4">{% include "componentes/vacio.html" with icono="route-off" fondo="bg-danger-subtle" color="text-danger" titulo=r.error texto=r.detalle %}</div>
+  {% endif %}
+  <div class="relative mt-4 overflow-hidden rounded-xl bg-surface-sunken">
+    <div class="overflow-x-auto"><div class="min-w-[620px] p-2">{% include "componentes/grafo.html" with g=lienzo nombres=True aria="Resultado en la red de cámaras" %}</div></div>
+    <ul class="absolute bottom-3 left-3 flex flex-wrap gap-x-4 gap-y-1 rounded-lg bg-surface px-3 py-2 text-xs text-text-secondary shadow-elev-2">
+      <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-graph-origin"></span>Origen</li>
+      <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-graph-target"></span>Destino</li>
+      <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-graph-visited"></span>Explorado (n = orden)</li>
+      <li class="flex items-center gap-1.5"><span class="h-1 w-4 rounded-full bg-graph-route"></span>Ruta</li>
+    </ul>
+  </div>
+</section>
+
+<section class="card card-pad">
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h2 class="text-xl font-semibold">Comparación de ejecuciones</h2>
+      <p class="text-xs text-text-secondary">Cada ejecución se agrega a la tabla para compararla con las anteriores.</p>
+    </div>
+    {% if corridas %}<a href="{% url 'panel:laboratorio_csv' %}" class="btn btn-secondary">{% lucide "download" size=16 %} Exportar CSV</a>{% endif %}
+  </div>
+  {% if corridas %}
+  <div class="mt-4 overflow-x-auto rounded-lg border border-border">
+    <table class="tabla">
+      <thead><tr><th>Algoritmo</th><th>Consulta</th><th>Resultado</th><th class="!text-right">Costo</th><th class="!text-right">Nodos explorados</th><th class="!text-right">Tiempo</th><th>Configuración</th></tr></thead>
+      <tbody>
+        {% for c in corridas %}
+        <tr class="{% if forloop.first and r.ok %}[&>td]:bg-primary-subtle{% endif %}">
+          <td class="font-semibold">{{ c.algoritmo }}</td>
+          <td class="font-mono text-[13px] whitespace-nowrap">{{ c.consulta }}</td>
+          <td class="max-w-[260px] py-2 font-mono text-[13px]">{{ c.resultado }}</td>
+          <td class="text-right font-mono text-[13px] whitespace-nowrap">{{ c.costo }}</td>
+          <td class="text-right font-mono text-[13px]">{{ c.explorados }}</td>
+          <td class="text-right font-mono text-[13px] whitespace-nowrap">{{ c.ms }} ms</td>
+          <td class="text-[13px] whitespace-nowrap">{{ c.config }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-3 flex items-center gap-2 text-xs text-text-secondary">{% lucide "info" size=14 %} Las dos variantes de A* devuelven el mismo costo; la heurística solo reduce los nodos explorados.</p>
+  {% else %}
+  <p class="mt-6 rounded-lg bg-surface-muted p-6 text-center text-text-secondary">Aún no hay ejecuciones. Prueba A* con y sin heurística para ver la diferencia en nodos explorados.</p>
+  {% endif %}
+</section>

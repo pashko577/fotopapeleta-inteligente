@@ -1,0 +1,170 @@
+[
+ {
+  "evento_id": "EV-20261015-000001",
+  "placa": "VBD-001",
+  "placa_confianza": 0.486,
+  "lecturas_votadas": 8,
+  "lecturas_totales": 8,
+  "lecturas": [
+   "V8D001",
+   "VBD001",
+   "VBD001",
+   "VBD001",
+   "VBD001",
+   "V8D001",
+   "VBD001",
+   "VBD001"
+  ],
+  "camara_id": "AV-01",
+  "timestamp": "2026-10-15T08:42:01.400000",
+  "conf_detector": 0.919,
+  "evidencia": [
+   "EV-20261015-000001_cuadro.jpg",
+   "EV-20261015-000001_placa.jpg"
+  ],
+  "modelo": {
+   "detector": "yolov8n_peru (época 82)",
+   "ocr": "easyocr 1.7.2 + formato + extracción + votación"
+  }
+ },
+ {
+  "evento_id": "EV-20261015-000002",
+  "placa": "VBD-001",
+  "placa_confianza": 0.429,
+  "lecturas_votadas": 6,
+  "lecturas_totales": 8,
+  "lecturas": [
+   "VBD001",
+   "-",
+   "VBD001",
+   "V8D001",
+   "-",
+   "VBD001",
+   "VBD001",
+   "VBD001"
+  ],
+  "camara_id": "AV-08",
+  "timestamp": "2026-10-15T08:44:01.400000",
+  "conf_detector": 0.875,
+  "evidencia": [
+   "EV-20261015-000002_cuadro.jpg",
+   "EV-20261015-000002_placa.jpg"
+  ],
+  "modelo": {
+   "detector": "yolov8n_peru (época 82)",
+   "ocr": "easyocr 1.7.2 + formato + extracción + votación"
+  }
+ },
+ {
+  "evento_id": "EV-20261015-000003",
+  "placa": "D9R-052",
+  "placa_confianza": 0.36,
+  "lecturas_votadas": 8,
+  "lecturas_totales": 8,
+  "lecturas": [
+   "DOR052",
+   "DOR052",
+   "DOR052",
+   "D9R052",
+   "D9R052",
+   "I9R052",
+   "D9R052",
+   "DOR052"
+  ],
+  "camara_id": "AV-01",
+  "timestamp": "2026-10-15T08:43:11.400000",
+  "conf_detector": 0.91,
+  "evidencia": [
+   "EV-20261015-000003_cuadro.jpg",
+   "EV-20261015-000003_placa.jpg"
+  ],
+  "modelo": {
+   "detector": "yolov8n_peru (época 82)",
+   "ocr": "easyocr 1.7.2 + formato + extracción + votación"
+  }
+ },
+ {
+  "evento_id": "EV-20261015-000004",
+  "placa": "DOR-052",
+  "placa_confianza": 0.526,
+  "lecturas_votadas": 8,
+  "lecturas_totales": 8,
+  "lecturas": [
+   "DOR052",
+   "DOR052",
+   "I2R052",
+   "DOR052",
+   "DOR052",
+   "DOR052",
+   "DOR052",
+   "DOR052"
+  ],
+  "camara_id": "AV-08",
+  "timestamp": "2026-10-15T08:46:31.400000",
+  "conf_detector": 0.916,
+  "evidencia": [
+   "EV-20261015-000004_cuadro.jpg",
+   "EV-20261015-000004_placa.jpg"
+  ],
+  "modelo": {
+   "detector": "yolov8n_peru (época 82)",
+   "ocr": "easyocr 1.7.2 + formato + extracción + votación"
+  }
+ },
+ {
+  "evento_id": "EV-20261015-000005",
+  "placa": "T3P-298",
+  "placa_confianza": 0.507,
+  "lecturas_votadas": 8,
+  "lecturas_totales": 8,
+  "lecturas": [
+   "TZP298",
+   "TSP298",
+   "T3P298",
+   "T3P298",
+   "T3P298",
+   "T3P298",
+   "T3P298",
+   "T3P298"
+  ],
+  "camara_id": "AV-01",
+  "timestamp": "2026-10-15T08:45:01.400000",
+  "conf_detector": 0.948,
+  "evidencia": [
+   "EV-20261015-000005_cuadro.jpg",
+   "EV-20261015-000005_placa.jpg"
+  ],
+  "modelo": {
+   "detector": "yolov8n_peru (época 82)",
+   "ocr": "easyocr 1.7.2 + formato + extracción + votación"
+  }
+ },
+ {
+  "evento_id": "EV-20261015-000006",
+  "placa": "T3P-298",
+  "placa_confianza": 0.601,
+  "lecturas_votadas": 8,
+  "lecturas_totales": 8,
+  "lecturas": [
+   "T3P298",
+   "T3P298",
+   "T3P298",
+   "T3P298",
+   "T3P298",
+   "T3P298",
+   "T3P298",
+   "T3P298"
+  ],
+  "camara_id": "AV-12",
+  "timestamp": "2026-10-15T08:46:01.400000",
+  "conf_detector": 0.95,
+  "evidencia": [
+   "EV-20261015-000006_cuadro.jpg",
+   "EV-20261015-000006_placa.jpg"
+  ],
+  "modelo": {
+   "detector": "yolov8n_peru (época 82)",
+   "ocr": "easyocr 1.7.2 + formato + extracción + votación"
+  }
+ }
+]

@@ -1,0 +1,9 @@
+{% extends "panel/base_panel.html" %}
+{% block pagina %}Sin permiso{% endblock %}
+{% block miga %}Sin permiso{% endblock %}
+{% block contenido %}
+<div class="card mx-auto mt-6 max-w-xl">
+  {% url 'panel:resumen' as resumen %}
+  {% include "componentes/vacio.html" with icono="lock" fondo="bg-warning-subtle" color="text-warning" titulo=mensaje texto="Pide a un administrador que te asigne el rol adecuado." accion_url=resumen accion_texto="Volver al resumen" accion_icono="layout-dashboard" %}
+</div>
+{% endblock %}

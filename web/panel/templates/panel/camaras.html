@@ -1,0 +1,168 @@
+{% extends "panel/base_panel.html" %}
+{% load static %}
+{% block pagina %}Cámaras{% endblock %}
+{% block miga %}Cámaras{% endblock %}
+{% block head_extra %}{% if mapa_real %}
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+{% endif %}{% endblock %}
+{% block contenido %}
+<div x-data="{ nueva: {% if form.errors %}true{% else %}false{% endif %} }">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-[28px] leading-tight font-semibold">Cámaras</h1>
+      <p class="mt-1 text-text-secondary">{{ camaras|length }} cámaras · {{ en_linea }} con capturas en los últimos 5 min{% if inactivas %} · {{ inactivas }} desactivada{{ inactivas|pluralize }}{% endif %}</p>
+    </div>
+    {% if puede_agregar %}<button type="button" class="btn btn-primary" @click="nueva = true" data-tour="agregar">{% lucide "plus" size=16 %} Agregar cámara</button>{% endif %}
+  </div>
+
+  <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+    <section>
+      <div class="relative overflow-hidden rounded-xl border border-border bg-surface-sunken" data-tour="mapa">
+        {% if mapa_real %}
+        {# isolate: las capas de Leaflet no tapan la barra superior #}
+        <div id="mapa-camaras" class="relative isolate z-0 h-[480px] w-full"></div>
+        {% else %}
+        <div class="overflow-x-auto"><div class="min-w-[600px]">{% include "componentes/grafo.html" with g=mapa enlace="?camara=" aria="Mapa de cámaras" %}</div></div>
+        {% endif %}
+        <ul class="absolute bottom-3 left-3 z-[400] flex flex-wrap gap-x-4 gap-y-1 rounded-lg bg-surface px-3 py-2 text-xs text-text-secondary shadow-elev-2">
+          <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-camera-online"></span>Con capturas recientes</li>
+          <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full border-2 border-graph-node-border"></span>Sin capturas recientes</li>
+          <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-camera-offline"></span>Desactivada</li>
+        </ul>
+      </div>
+      {% if mapa_real %}
+      <p class="mt-3 text-xs text-text-secondary">Ubicaciones de OpenStreetMap (aproximadas; para la demo se reemplazan por el GPS de cada celular). Cada tramo es la ruta más corta <b>por calles reales</b> (OSRM): la distancia que usa la velocidad por tramo nunca supera la real, a favor del conductor.</p>
+      {% else %}
+      <p class="mt-3 text-xs text-text-secondary">Red esquemática con coordenadas x/y (km). Para usar el mapa real: <span class="font-mono">python manage.py calcular_tramos</span> y <span class="font-mono">importar_red ../data/grafo_camaras_real.json</span>.</p>
+      {% endif %}
+    </section>
+
+    {% if detalle %}
+    {# Drawer de detalle de la cámara #}
+    <section class="card flex flex-col self-start" data-tour="detalle">
+      <div class="flex items-start justify-between gap-3 border-b border-border p-5">
+        <div>
+          <h2 class="text-xl font-semibold">{{ detalle.cam.codigo }} · {{ detalle.cam.nombre }}</h2>
+          <p class="mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold {% if detalle.cam.estado == 'online' %}bg-success-subtle text-success{% elif detalle.cam.estado == 'offline' %}bg-danger-subtle text-danger{% else %}bg-neutral-subtle text-text-secondary{% endif %}">
+            <span class="size-1.5 rounded-full bg-current"></span>{% if detalle.cam.estado == 'online' %}Con capturas recientes{% elif detalle.cam.estado == 'offline' %}Desactivada{% else %}Sin capturas recientes{% endif %}</p>
+        </div>
+        <a href="{% url 'panel:camaras' %}" class="btn btn-ghost btn-icon" aria-label="Cerrar detalle">{% lucide "x" size=18 %}</a>
+      </div>
+      <div class="flex flex-col gap-5 p-5">
+        <div class="aspect-video overflow-hidden rounded-xl bg-surface-sunken">
+          {% if detalle.imagen %}<img src="{{ detalle.imagen }}" alt="Captura de {{ detalle.con_imagen.placa|placa }} en {{ detalle.cam.codigo }}, {{ detalle.con_imagen.timestamp|fecha_hora }}" class="size-full object-cover">
+          {% else %}<div class="flex size-full flex-col items-center justify-center gap-2 text-text-muted">{% lucide "image-off" size=32 %}<span class="text-[13px]">Sin imágenes todavía</span></div>{% endif %}
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="rounded-lg bg-surface-muted p-3"><p class="text-xs text-text-secondary">Capturas</p><p class="font-mono text-base font-semibold">{{ detalle.cam.n|miles }}</p></div>
+          <div class="rounded-lg bg-surface-muted p-3"><p class="text-xs text-text-secondary">Capturas hoy</p><p class="font-mono text-base font-semibold">{{ detalle.hoy|miles }}</p></div>
+          <div class="rounded-lg bg-surface-muted p-3"><p class="text-xs text-text-secondary">Placas distintas</p><p class="font-mono text-base font-semibold">{{ detalle.placas|miles }}</p></div>
+        </div>
+        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-[13px]">
+          <dt class="text-text-secondary">Última captura</dt><dd class="text-right font-mono">{{ detalle.ultima.timestamp|fecha_hora }}</dd>
+          {% if detalle.cam.lat is not None %}<dt class="text-text-secondary">Ubicación (lat, lon)</dt><dd class="text-right font-mono">{{ detalle.cam.lat|floatformat:5 }}, {{ detalle.cam.lon|floatformat:5 }}</dd>
+          {% else %}<dt class="text-text-secondary">Coordenadas (km)</dt><dd class="text-right font-mono">{{ detalle.cam.x_km|num }}, {{ detalle.cam.y_km|num }}</dd>{% endif %}
+          <dt class="text-text-secondary">Stream</dt><dd class="truncate text-right font-mono">{{ detalle.cam.url_stream|default:"—" }}</dd>
+        </dl>
+        <div>
+          <p class="rotulo text-text-muted">Tramos conectados</p>
+          <ul class="mt-2 flex flex-col gap-2">
+            {% for vecino, t in detalle.tramos %}
+              <li><a href="?camara={{ vecino.codigo }}" class="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5 hover:bg-surface-muted">
+                <span class="text-primary-text">{% lucide "route" size=16 %}</span>
+                <span class="flex-1 text-[13px] font-semibold">{{ vecino.codigo }} · {{ vecino.nombre }}</span>
+                <span class="font-mono text-xs text-text-secondary">{{ t.km|num }} km · {{ t.minutos|floatformat:0 }} min · {{ t.limite_kmh }} km/h{% if t.dirigida %} · un sentido{% endif %}</span>
+              </a></li>
+            {% empty %}<li class="text-[13px] text-text-secondary">Sin tramos: la cámara no forma parte de ninguna ruta.</li>{% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 border-t border-border p-5">
+        {% if user.is_staff %}<a href="{% url 'admin:camaras_camara_change' detalle.cam.codigo %}" class="btn btn-secondary">{% lucide "pencil" size=16 %} Editar en admin</a>{% endif %}
+        <a href="{% url 'panel:captura' %}" class="btn btn-primary">{% lucide "radio" size=16 %} Ver captura</a>
+      </div>
+    </section>
+    {% else %}
+    <section class="card self-start overflow-hidden" data-tour="detalle">
+      <table class="tabla">
+        <thead><tr><th>Cámara</th><th>Estado</th><th class="text-right">Capturas</th></tr></thead>
+        <tbody>
+          {% for c in camaras %}
+          <tr class="cursor-pointer" onclick="location.href='?camara={{ c.codigo }}'">
+            <td><a href="?camara={{ c.codigo }}" class="block"><span class="font-mono font-semibold">{{ c.codigo }}</span><span class="block text-xs text-text-secondary">{{ c.nombre }}</span></a></td>
+            <td><span class="inline-flex items-center gap-1.5 text-[13px]"><span class="size-2 rounded-full {% if c.estado == 'online' %}bg-camera-online{% elif c.estado == 'offline' %}bg-camera-offline{% else %}bg-border-strong{% endif %}"></span>{% if c.estado == 'online' %}Activa{% elif c.estado == 'offline' %}Desactivada{% elif c.ultima %}Última {{ c.ultima|hace }}{% else %}Sin capturas{% endif %}</span></td>
+            <td class="text-right font-mono text-[13px]">{{ c.n|miles }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+  </div>
+
+  {% if puede_agregar %}
+  {# Modal Agregar cámara #}
+  <div x-show="nueva" x-cloak class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-overlay p-4 sm:items-center" @keydown.escape.window="nueva = false">
+    <form method="post" class="w-full max-w-[640px] rounded-2xl bg-surface shadow-elev-4" @click.outside="nueva = false" role="dialog" aria-labelledby="titulo-camara" novalidate>
+      {% csrf_token %}
+      <div class="flex items-start gap-4 border-b border-border p-6">
+        <div class="flex-1"><h2 id="titulo-camara" class="text-xl font-semibold">Agregar cámara</h2>
+          <p class="mt-1 text-text-secondary">La cámara entra al grafo con su primer tramo. Se comprueba que la red siga siendo válida.</p></div>
+        <button type="button" class="btn btn-ghost btn-icon" @click="nueva = false" aria-label="Cerrar">{% lucide "x" size=18 %}</button>
+      </div>
+      <div class="grid gap-4 p-6 sm:grid-cols-2">
+        {% if form.non_field_errors %}<div class="sm:col-span-2">{% include "componentes/banner.html" with tipo="danger" texto=form.non_field_errors|join:" " %}</div>{% endif %}
+        {% for campo in form %}
+          <div class="{% if campo.name == 'nombre' or campo.name == 'url_stream' %}sm:col-span-2{% endif %}">
+            <label class="field-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+            {% if campo.name == "vecino" %}
+              <select name="vecino" id="{{ campo.id_for_label }}" class="input">{% for v, n in campo.field.choices %}<option value="{{ v }}" {% if campo.value|stringformat:'s' == v|stringformat:'s' %}selected{% endif %}>{{ n }}</option>{% endfor %}</select>
+            {% else %}
+              <input name="{{ campo.name }}" id="{{ campo.id_for_label }}" value="{{ campo.value|default_if_none:'' }}" class="input {% if campo.name == 'codigo' %}font-mono uppercase{% endif %} {% if campo.errors %}input-error{% endif %}"
+                     {% if campo.name == 'codigo' %}placeholder="AV-21"{% elif campo.name == 'url_stream' %}placeholder="http://192.168.1.20:8080/video"{% endif %}>
+            {% endif %}
+            {% for e in campo.errors %}<p class="mt-1.5 flex items-center gap-1.5 text-[13px] text-danger">{% lucide "circle-x" size=14 %} {{ e }}</p>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="flex justify-end gap-3 rounded-b-2xl border-t border-border bg-surface-muted px-6 py-4">
+        <button type="button" class="btn btn-secondary" @click="nueva = false">Cancelar</button>
+        <button class="btn btn-primary">{% lucide "plus" size=16 %} Agregar cámara</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% if mapa_real %}
+{{ mapa_real|json_script:"datos-camaras" }}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const d = JSON.parse(document.getElementById("datos-camaras").textContent);
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const mapa = L.map("mapa-camaras");
+  /* OpenStreetMap exige el Referer: se envía solo el origen del sitio (ver docs/pruebas/11) */
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, referrerPolicy: "strict-origin-when-cross-origin",
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · tramos: OSRM' }).addTo(mapa);
+  d.tramos.forEach(t => {
+    const sel = d.seleccion && (t.de === d.seleccion || t.a === d.seleccion);
+    L.polyline(t.geo, { color: sel ? css("--color-primary") : css("--color-text-secondary"), weight: sel ? 5 : 3, opacity: sel ? .9 : .5 })
+      .bindTooltip(`${t.de} – ${t.a} · ${t.km.toFixed(2)} km · ${t.min} min · ${t.limite} km/h<br><span style="opacity:.7">${t.fuente}</span>`, { sticky: true })
+      .addTo(mapa);
+  });
+  const color = { online: css("--color-camera-online"), offline: css("--color-camera-offline") };
+  // Etiquetas alternadas izquierda/derecha de norte a sur: dos cámaras cercanas no se tapan
+  const lado = {};
+  [...d.camaras].sort((a, b) => b.lat - a.lat).forEach((c, i) => lado[c.codigo] = i % 2 ? "right" : "left");
+  const puntos = d.camaras.map(c => {
+    L.circleMarker([c.lat, c.lon], { radius: c.codigo === d.seleccion ? 11 : 8, weight: 3, color: color[c.estado] || css("--color-graph-node-border"),
+      fillColor: c.codigo === d.seleccion ? css("--color-primary") : "#fff", fillOpacity: 1 })
+      .bindTooltip(`<b>${c.codigo}</b> · ${c.nombre}`, { permanent: true, direction: lado[c.codigo], offset: [lado[c.codigo] === "left" ? -10 : 10, 0] })
+      .on("click", () => location.href = `?camara=${c.codigo}`).addTo(mapa);
+    return [c.lat, c.lon];
+  });
+  mapa.fitBounds(puntos, { padding: [40, 40] });
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,5 @@
+{% if nivel == "fluido" %}<span class="inline-flex h-6 items-center gap-1.5 rounded-full bg-success-subtle px-2 text-xs font-medium text-success"><span class="size-1.5 rounded-full bg-current"></span>Fluido</span>
+{% elif nivel == "moderado" %}<span class="inline-flex h-6 items-center gap-1.5 rounded-full bg-warning-subtle px-2 text-xs font-medium text-warning"><span class="size-1.5 rounded-full bg-current"></span>Moderado</span>
+{% elif nivel == "congestionado" %}<span class="inline-flex h-6 items-center gap-1.5 rounded-full bg-danger-subtle px-2 text-xs font-medium text-danger"><span class="size-1.5 rounded-full bg-current"></span>Congestionado</span>
+{% elif nivel == "sin historial" %}<span class="inline-flex h-6 items-center gap-1.5 rounded-full bg-neutral-subtle px-2 text-xs font-medium text-text-secondary" title="Hacen falta 5 mediciones para saber qué es lo normal">Sin historial</span>
+{% else %}<span class="inline-flex h-6 items-center gap-1.5 rounded-full bg-neutral-subtle px-2 text-xs font-medium text-text-muted">Sin datos recientes</span>{% endif %}

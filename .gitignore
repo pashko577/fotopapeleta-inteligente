@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Datos pesados o personales (placas reales): no se versionan
+data/muestras/*
+!data/muestras/.gitkeep
+datasets/
+runs/
+*.pt
+*.onnx
+media/
+
+# Archivos grandes y temporales
+*.log
+*.zip
+~$*
+.DS_Store
+Thumbs.db
+
+# Django
+db.sqlite3
+.env
+
+# Salidas regenerables de la demo
+demo/salida/
+
+# Tailwind CLI descargado y estáticos recolectados
+web/.django_tailwind_cli/
+web/staticfiles/
+
+# No se publican: videos con placas reales (Ley N.° 29733), borradores del paper
+# (aún no entregado) e imágenes sueltas
+*.mp4
+*.docx
+generated.png

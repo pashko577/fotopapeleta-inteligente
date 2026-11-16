@@ -1,0 +1,13 @@
+# Módulo A (percepción). Versiones verificadas con RTX 5070 + CUDA 12.8 (15/10/2026).
+# Instalar PyTorch PRIMERO desde el índice de CUDA (la versión de PyPI no ve la GPU):
+#   pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
+#   pip install -r requirements-ml.txt
+# Sin GPU NVIDIA: omitir --index-url (funciona en CPU, más lento).
+-r requirements.txt
+ultralytics==8.4.177
+easyocr==1.7.2
+opencv-python==5.0.0.93
+lap==0.5.12  # seguimiento ByteTrack de Ultralytics (Tránsito en vivo)
+onnxruntime==1.31.0
+# OCR de placas por defecto. Instalar SIN dependencias (pide opencv-python-headless, que choca con opencv-python):
+#   pip install --no-deps fast-plate-ocr==1.1.0

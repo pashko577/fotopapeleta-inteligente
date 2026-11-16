@@ -1,0 +1,87 @@
+{% extends "panel/base_panel.html" %}
+{% block pagina %}Papeletas{% endblock %}
+{% block miga %}Papeletas{% endblock %}
+{% block contenido %}
+<div x-data="{ anular: false, numero: '' }">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-[28px] leading-tight font-semibold">Papeletas</h1>
+      <p class="mt-1 text-text-secondary">{% for k, n, c in pestanas|slice:"1:" %}{{ c }} {{ n|lower }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+    </div>
+  </div>
+
+  {# Tabs con contador #}
+  <nav class="mt-5 flex gap-6 overflow-x-auto border-b border-border" aria-label="Estado" data-tour="pestanas">
+    {% for clave, nombre, n in pestanas %}
+      {% url_con estado=clave p=None as ir %}
+      <a href="{{ ir }}" class="-mb-px flex h-11 flex-none items-center gap-2 border-b-2 {% if f.estado|default:'' == clave %}border-primary font-semibold text-primary-text{% else %}border-transparent text-text-secondary hover:text-text{% endif %}">
+        {{ nombre }} <span class="rounded-full bg-surface-muted px-2 font-mono text-xs">{{ n }}</span></a>
+    {% endfor %}
+  </nav>
+
+  <form method="get" class="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_auto]">
+    <input type="hidden" name="estado" value="{{ f.estado }}">
+    <div><label class="field-label" for="p-q">Número o placa</label>
+      <div class="relative"><span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-muted">{% lucide "search" size=16 %}</span>
+        <input id="p-q" name="q" value="{{ f.q }}" type="search" placeholder="FP-2026-… o ABC-123" class="input pl-9"></div></div>
+    <div><label class="field-label" for="p-tipo">Tipo</label>
+      <select id="p-tipo" name="tipo" class="input" onchange="this.form.submit()"><option value="">Todos los tipos</option>{% for v, n in tipos %}<option value="{{ v }}" {% if f.tipo == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+    <div><span class="field-label">Fecha de emisión</span>
+      <div class="flex items-center gap-2"><input name="desde" type="date" value="{{ f.desde }}" aria-label="Desde" class="input font-mono text-[13px]"><span class="text-text-muted">–</span><input name="hasta" type="date" value="{{ f.hasta }}" aria-label="Hasta" class="input font-mono text-[13px]"></div></div>
+    <div class="flex items-end"><button class="btn btn-secondary w-full">{% lucide "list-filter" size=16 %} Filtrar</button></div>
+  </form>
+
+  {% if pagina.object_list %}
+  <div class="card mt-4 overflow-visible" data-tour="tabla">
+    <div class="max-xl:overflow-x-auto">
+      <table class="tabla">
+        <thead><tr><th>Número</th><th>Placa</th><th>Tipo</th><th>Emitida</th><th>Validada por</th><th>Estado</th><th>Revisión</th><th class="w-24"><span class="sr-only">Acciones</span></th></tr></thead>
+        <tbody>
+          {% for p in pagina %}
+          <tr>
+            <td class="font-mono text-[13px] font-semibold whitespace-nowrap">{{ p.numero }}</td>
+            <td>{% placa_sm p.placa %}</td>
+            <td>{% tag_tipo p.infraccion.tipo %}</td>
+            <td class="font-mono text-[13px] whitespace-nowrap">{{ p.emitida|date:"d/m/Y H:i" }}</td>
+            <td class="whitespace-nowrap">{{ p.validador|nombre_corto }}</td>
+            <td>{% badge_estado p.estado %}</td>
+            <td class="font-mono text-[13px] font-semibold text-primary-text">{{ p.revision.codigo|default:"—" }}</td>
+            <td>
+              <div class="flex items-center justify-end gap-1">
+                <a href="{% url 'portal:imprimir' p.numero %}" target="_blank" class="btn btn-ghost btn-icon btn-sm" aria-label="Descargar PDF" title="Descargar PDF">{% lucide "download" size=16 %}</a>
+                <div x-data="{ m: false }" class="relative" @keydown.escape="m = false">
+                  <button type="button" class="btn btn-ghost btn-icon btn-sm" @click="m = !m" aria-label="Más opciones" title="Más opciones">{% lucide "ellipsis-vertical" size=16 %}</button>
+                  <div x-show="m" x-cloak @click.outside="m = false" class="card absolute right-0 z-20 mt-1 w-56 py-1 shadow-elev-2">
+                    <a href="{% url 'panel:infraccion' p.infraccion_id %}" class="flex h-9 items-center gap-2 px-3 hover:bg-surface-muted">{% lucide "eye" size=16 %} Ver detalle</a>
+                    <a href="{% url 'portal:imprimir' p.numero %}" target="_blank" class="flex h-9 items-center gap-2 px-3 hover:bg-surface-muted">{% lucide "download" size=16 %} Descargar PDF</a>
+                    <button type="button" class="flex h-9 w-full items-center gap-2 px-3 hover:bg-surface-muted" @click="fpCopiar(location.origin + '{% url 'portal:detalle' p.numero %}', 'Enlace público copiado'); m = false">{% lucide "copy" size=16 %} Copiar enlace público</button>
+                    {% if puede_anular and p.estado != "anulada" %}
+                    <div class="my-1 h-px bg-border"></div>
+                    <button type="button" class="flex h-9 w-full items-center gap-2 px-3 text-danger hover:bg-surface-muted" @click="numero = '{{ p.numero }}'; anular = true; m = false">{% lucide "ban" size=16 %} Anular papeleta</button>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "panel/parciales/paginacion.html" %}
+  </div>
+  {% else %}
+  <div class="card mt-4" data-tour="tabla">
+    {% include "componentes/vacio.html" with icono="file-text" titulo="No hay papeletas con estos filtros" texto="Las papeletas se emiten al aprobar una infracción." %}
+  </div>
+  {% endif %}
+
+  {% if puede_anular %}
+  {% for p in pagina %}{% if p.estado != "anulada" %}
+  <div x-show="anular && numero === '{{ p.numero }}'" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @keydown.escape.window="anular = false">
+    {% include "panel/parciales/modal_anular.html" with numero=p.numero %}
+  </div>
+  {% endif %}{% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

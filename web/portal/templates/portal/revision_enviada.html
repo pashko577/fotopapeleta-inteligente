@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}Solicitud registrada · {{ s.codigo }}{% endblock %}
+{% block body_class %}min-h-dvh bg-overlay{% endblock %}
+{% block cuerpo %}
+<div class="flex min-h-dvh items-center justify-center p-4">
+  <div class="w-full max-w-[480px] rounded-2xl bg-surface p-8 text-center shadow-elev-4" role="dialog" aria-labelledby="titulo-ok">
+    <span class="mx-auto flex size-16 items-center justify-center rounded-full bg-success-subtle text-success">{% lucide "circle-check" size=32 %}</span>
+    <h1 id="titulo-ok" class="mt-4 text-xl font-semibold">Solicitud registrada</h1>
+    <button type="button" onclick="fpCopiar('{{ s.codigo }}', 'Código copiado')" class="mx-auto mt-3 flex items-center gap-2 rounded-md bg-surface-muted px-3 py-1.5 font-mono text-base font-semibold" title="Copiar código">
+      {{ s.codigo }} <span class="text-text-muted">{% lucide "copy" size=16 %}</span>
+    </button>
+    <p class="mt-4 text-text-secondary">Te responderemos a {{ correo }} en un plazo máximo de 7 días hábiles. Mientras tanto, la papeleta queda en estado «En revisión».</p>
+    <div class="mt-6 grid grid-cols-2 gap-3">
+      <a href="{% url 'portal:resultados' %}?placa={{ p.placa }}" class="btn btn-secondary">Cerrar</a>
+      <a href="{% url 'portal:detalle' p.numero %}" class="btn btn-primary">{% lucide "file-text" size=16 %} Ver papeleta</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

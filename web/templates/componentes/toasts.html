@@ -1,0 +1,19 @@
+{# 8.5 Toast: abajo a la derecha (desktop) o centrado (móvil); se apilan con gap 8 #}
+<div x-data aria-live="polite" class="pointer-events-none fixed inset-x-4 bottom-24 z-[60] flex flex-col items-center gap-2 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:items-end">
+  <template x-for="t in $store.toasts.lista" :key="t.id">
+    <div x-transition.opacity class="card pointer-events-auto flex w-full max-w-[360px] gap-3 p-4 shadow-elev-3">
+      <span class="mt-0.5 flex-none" :class="{'text-success': t.tipo==='success', 'text-danger': t.tipo==='error', 'text-warning': t.tipo==='warning', 'text-info': t.tipo==='info'}">
+        <template x-if="t.tipo==='success'">{% lucide "circle-check" size=20 %}</template>
+        <template x-if="t.tipo==='error'">{% lucide "circle-x" size=20 %}</template>
+        <template x-if="t.tipo==='warning'">{% lucide "triangle-alert" size=20 %}</template>
+        <template x-if="t.tipo==='info'">{% lucide "info" size=20 %}</template>
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="font-semibold" x-text="t.titulo"></p>
+        <p class="text-[13px] text-text-secondary" x-show="t.texto" x-text="t.texto"></p>
+        <a x-show="t.accion" :href="t.accion?.url" class="mt-1 inline-block text-[13px] font-semibold text-primary-text" x-text="t.accion?.texto"></a>
+      </div>
+      <button type="button" class="flex-none text-text-muted hover:text-text" @click="$store.toasts.quitar(t.id)" aria-label="Cerrar">{% lucide "x" size=16 %}</button>
+    </div>
+  </template>
+</div>

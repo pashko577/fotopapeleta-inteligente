@@ -1,0 +1,22 @@
+{# Cifras del análisis continuo (se vuelve a pedir cada 5 s desde detalle.html) #}
+{% if vivo.error %}<div class="mb-3">{% include "componentes/banner.html" with tipo="danger" texto=vivo.error %}</div>{% endif %}
+<p class="mb-2 flex items-center gap-2 text-xs text-text-muted">
+  {% if vivo.estado == "analizando" %}<span class="size-2 animate-pulse rounded-full bg-danger"></span> En vivo · se actualiza cada 5 s
+  {% elif vivo.error %}Se reintentará en unos segundos
+  {% else %}<span class="animate-spin">{% lucide "loader-circle" size=14 %}</span> Conectando…{% endif %}
+</p>
+<div class="grid grid-cols-3 gap-2">
+  <div class="rounded-lg bg-surface-muted p-3"><p class="text-xs text-text-secondary">Visibles a la vez</p><p class="font-mono text-lg font-semibold">{{ vivo.en_cuadro|default_if_none:"—" }}</p></div>
+  <div class="rounded-lg bg-surface-muted p-3"><p class="text-xs text-text-secondary">Lo normal</p><p class="font-mono text-lg font-semibold">{{ cam.estado.tipico|default_if_none:"—" }}</p></div>
+  <div class="rounded-lg bg-surface-muted p-3"><p class="text-xs text-text-secondary">Veh/min aprox.</p><p class="font-mono text-lg font-semibold">{{ vivo.por_minuto|default_if_none:"—" }}</p></div>
+</div>
+<p class="mt-2 text-xs text-text-muted">
+  {% if vivo.por_clase %}{{ vivo.por_clase.autos }} autos · {{ vivo.por_clase.motos }} motos · {{ vivo.por_clase.buses }} buses · {{ vivo.por_clase.camiones }} camiones en movimiento · últimos {{ vivo.ventana }} s de video
+  {% elif vivo.estado == "analizando" %}Juntando video para calcular veh/min (hacen falta 10 s)…
+  {% else %}Visibles a la vez: promedio de los últimos 5 s · Veh/min: vehículos distintos en movimiento en el último minuto{% endif %}
+</p>
+{% if historial %}
+<p class="rotulo mt-4 text-text-muted">Mediciones guardadas (cada 2 min, visibles a la vez)</p>
+<div class="mt-2 flex h-16 items-end gap-1">{% for m, alto in historial %}<span class="flex-1 rounded-t-sm bg-primary/70" style="height: {{ alto|stringformat:'.0f' }}%" title="{{ m.inicio|hora }} · {{ m.en_cuadro }}"></span>{% endfor %}</div>
+{% endif %}
+{% if vivo %}<span id="nivel-camara" hx-swap-oob="true">{% include "transito/parciales/nivel.html" %}</span>{% endif %}

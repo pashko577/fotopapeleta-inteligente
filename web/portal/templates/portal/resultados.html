@@ -1,0 +1,66 @@
+{% extends "portal/base_portal.html" %}
+{% block pagina %}Papeletas de {{ placa|placa }}{% endblock %}
+{% block contenido %}
+<div class="mx-auto max-w-[960px] px-4 py-6 md:py-10" x-data x-init="$store.historial.agregar('{{ placa|placa }}')">
+  <a href="{% url 'portal:consulta' %}" class="inline-flex h-11 items-center gap-2 font-medium text-primary-text md:h-auto">{% lucide "search" size=16 %} Nueva consulta</a>
+
+  <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
+    {% placa_grande placa "lg" %}
+    <div>
+      <h1 class="text-[22px] font-semibold md:text-[28px]">{% if total %}{{ total }} papeleta{{ total|pluralize }} encontrada{{ total|pluralize }}{% else %}Sin papeletas{% endif %}</h1>
+      <p class="text-text-secondary">Consulta realizada el {{ ahora|fecha_hora }}</p>
+    </div>
+  </div>
+
+  {% if total %}
+  <div class="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1" role="tablist" aria-label="Filtrar por estado">
+    {% for clave, nombre, n in chips %}
+      <a href="?placa={{ placa }}{% if clave %}&estado={{ clave }}{% endif %}" role="tab" aria-selected="{% if estado == clave %}true{% else %}false{% endif %}"
+         class="chip h-11 flex-none md:h-8 {% if estado == clave %}chip-activo{% endif %}">{{ nombre }} ({{ n }})</a>
+    {% endfor %}
+  </div>
+
+  <div class="mt-5 flex flex-col gap-4">
+    {% for p in papeletas %}
+      <article class="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+        <div class="aspect-[16/10] w-full flex-none overflow-hidden rounded-lg bg-surface-sunken sm:w-44">
+          {% if p.miniatura %}<img src="{{ p.miniatura }}" alt="Captura de {{ p.placa|placa }} en {{ p.primera.camara_id }}, {{ p.primera.timestamp|fecha_hora }}" class="size-full object-cover">
+          {% else %}<span class="flex size-full items-center justify-center text-text-muted">{% lucide "image" size=28 %}</span>{% endif %}
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-3">
+            <p class="flex items-center gap-2 font-semibold">{% icono_tipo p.infraccion.tipo %}{{ p.infraccion.tipo|nombre_tipo }}</p>
+            <span class="sm:hidden">{% badge_estado p.estado %}</span>
+          </div>
+          <p class="mt-2 font-mono text-base font-semibold">{{ p.numero }}</p>
+          <p class="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-text-secondary">
+            <span class="inline-flex items-center gap-1.5 font-mono">{% lucide "calendar" size=14 %} {{ p.primera.timestamp|fecha_hora }}</span>
+            <span class="inline-flex items-center gap-1.5">{% lucide "map-pin" size=14 %} {{ p.primera.camara.nombre }}{% if p.ultima and p.ultima != p.primera %} → {{ p.ultima.camara.nombre }}{% endif %}</span>
+          </p>
+          {% if p.revision and p.estado == "en_revision" %}
+            <p class="mt-1 text-[13px] text-text-muted">Solicitud {{ p.revision.codigo }} en revisión</p>
+          {% elif p.infraccion.analisis %}
+            <p class="mt-1 text-[13px] text-text-muted">{{ p.infraccion.analisis.v_conservadora|num }} km/h en zona de {{ p.infraccion.analisis.limite|num:0 }} km/h</p>
+          {% endif %}
+        </div>
+        <div class="flex flex-none flex-col items-stretch gap-3 sm:items-end">
+          <span class="max-sm:hidden">{% badge_estado p.estado %}</span>
+          <a href="{% url 'portal:detalle' p.numero %}" class="btn btn-secondary h-11 sm:h-[var(--control-h-md)]">{% lucide "chevron-right" size=16 %} Ver detalle</a>
+        </div>
+      </article>
+    {% empty %}
+      {% include "componentes/vacio.html" with icono="list-filter" titulo="Ninguna papeleta en este estado" texto="Elige otro filtro para ver el resto." %}
+    {% endfor %}
+  </div>
+
+  <div class="mt-6 flex items-start gap-3 rounded-lg bg-info-subtle p-4">
+    <span class="text-info">{% lucide "info" size=18 %}</span>
+    <p>Si algo no es correcto, abre el detalle de la papeleta y elige «Solicitar revisión».</p>
+  </div>
+  {% else %}
+  <div class="card mt-8">
+    {% include "componentes/vacio.html" with icono="circle-check" fondo="bg-success-subtle" color="text-success" titulo="No hay papeletas registradas" texto="No encontramos foto-papeletas emitidas para esta placa." %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "panel/base_panel.html" %}
+{% block pagina %}Laboratorio del grafo{% endblock %}
+{% block miga %}Laboratorio del grafo{% endblock %}
+{% block contenido %}
+<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="text-[28px] leading-tight font-semibold">Laboratorio del grafo</h1>
+    <p class="mt-1 text-text-secondary">Ejecuta BFS, DFS y A* sobre la red de cámaras y compara sus métricas.</p>
+  </div>
+  <span class="inline-flex items-center gap-2 self-start rounded-full border border-border bg-surface px-3 py-1.5 font-mono text-xs text-text-secondary sm:self-auto">{% lucide "waypoints" size=14 %} Grafo {{ version }} · {{ n_camaras }} cámaras · {{ n_tramos }} tramos</span>
+</div>
+
+{% if not p %}
+<div class="card mt-6">{% include "componentes/vacio.html" with icono="waypoints" titulo="La red no tiene cámaras" texto="Carga la red con python manage.py importar_red." %}</div>
+{% else %}
+<div class="mt-6 grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
+  {# Parámetros #}
+  <form data-tour="parametros" class="card card-pad self-start" x-data="{ alg: '{{ p.algoritmo }}' }"
+        hx-post="{% url 'panel:laboratorio_ejecutar' %}" hx-target="#resultado-lab" hx-swap="innerHTML" hx-indicator="#ejecutar">
+    <h2 class="text-xl font-semibold">Parámetros</h2>
+    <fieldset class="mt-4">
+      <legend class="field-label">Algoritmo</legend>
+      <div class="segmented grid w-full grid-cols-3">
+        <label class="cursor-pointer"><input type="radio" name="algoritmo" value="astar" x-model="alg" class="sr-only">A*</label>
+        <label class="cursor-pointer"><input type="radio" name="algoritmo" value="bfs" x-model="alg" class="sr-only">BFS</label>
+        <label class="cursor-pointer"><input type="radio" name="algoritmo" value="dfs" x-model="alg" class="sr-only">DFS</label>
+      </div>
+    </fieldset>
+    <div class="mt-4 grid grid-cols-2 gap-3">
+      <div><label class="field-label" for="lab-origen">Origen</label>
+        <select id="lab-origen" name="origen" class="input font-mono">{% for c in nodos %}<option {% if c == p.origen %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+      <div><label class="field-label" for="lab-destino">Destino</label>
+        <select id="lab-destino" name="destino" class="input font-mono disabled:opacity-50" :disabled="alg === 'bfs'">{% for c in nodos %}<option {% if c == p.destino %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+    </div>
+    <fieldset class="mt-4" :disabled="alg === 'bfs'" :class="alg === 'bfs' && 'opacity-50'">
+      <legend class="field-label">Peso de las aristas</legend>
+      <div class="segmented grid w-full grid-cols-2">
+        <label class="cursor-pointer"><input type="radio" name="peso" value="km" class="sr-only" {% if p.peso == "km" %}checked{% endif %}>{% lucide "ruler" size=16 %} km</label>
+        <label class="cursor-pointer"><input type="radio" name="peso" value="min" class="sr-only" {% if p.peso == "min" %}checked{% endif %}>{% lucide "timer" size=16 %} min</label>
+      </div>
+    </fieldset>
+    <label class="mt-4 flex items-start gap-3" :class="alg !== 'astar' && 'opacity-50'" x-data="{ on: {{ p.heuristica|yesno:'true,false' }} }">
+      <span class="flex-1"><span class="block font-medium">Heurística de línea recta</span><span class="block text-xs text-text-secondary">Desactívala para comparar con h = 0 (Dijkstra).</span></span>
+      <input type="hidden" name="heuristica" :value="on ? 'on' : 'off'">
+      <button type="button" role="switch" class="switch mt-0.5" :aria-checked="on.toString()" @click="on = !on" :disabled="alg !== 'astar'" aria-label="Heurística de línea recta"></button>
+    </label>
+    <div class="mt-4 grid grid-cols-2 gap-3">
+      <div :class="alg !== 'bfs' && 'opacity-50'"><label class="field-label" for="lab-k">k (solo BFS)</label>
+        <input id="lab-k" name="k" type="number" min="1" max="6" value="{{ p.k }}" class="input font-mono" :disabled="alg !== 'bfs'"></div>
+      <div :class="alg !== 'dfs' && 'opacity-50'"><label class="field-label" for="lab-prof">max_prof (DFS)</label>
+        <input id="lab-prof" name="max_prof" type="number" min="1" max="12" value="{{ p.max_prof }}" class="input font-mono" :disabled="alg !== 'dfs'"></div>
+    </div>
+    <div class="mt-6 grid grid-cols-[auto_1fr] gap-3">
+      <button type="submit" form="limpiar-lab" class="btn btn-secondary">{% lucide "refresh-cw" size=16 %} Limpiar</button>
+      <button id="ejecutar" class="btn btn-primary">
+        <span class="ocultar-al-cargar inline-flex items-center gap-2">{% lucide "play" size=16 %} Ejecutar</span>
+        <span class="htmx-indicator items-center gap-2"><span class="animate-spin">{% lucide "loader-circle" size=16 %}</span> Ejecutando</span>
+      </button>
+    </div>
+  </form>
+  <div id="resultado-lab" class="flex min-w-0 flex-col gap-6" data-tour="resultado">{% include "panel/parciales/laboratorio_resultado.html" %}</div>
+</div>
+
+<form id="limpiar-lab" method="post" action="{% url 'panel:laboratorio_limpiar' %}" hidden>{% csrf_token %}</form>
+
+{# Velocidad por tramo #}
+<section class="card card-pad mt-6" data-tour="velocidad">
+  <h2 class="text-xl font-semibold">Velocidad por tramo</h2>
+  <p class="text-xs text-text-secondary">La misma fórmula que usa la decisión: distancia mínima (A*) entre el tiempo observado más el margen de reloj.</p>
+  <form class="mt-4 grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]" hx-post="{% url 'panel:laboratorio_velocidad' %}" hx-target="#resultado-velocidad">
+    <div><label class="field-label" for="v-a">Cámara A</label><select id="v-a" name="cam_a" class="input font-mono">{% for c in nodos %}<option {% if forloop.first %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+    <div><label class="field-label" for="v-ha">Hora en A</label><input id="v-ha" name="hora_a" value="08:42:00" pattern="\d{2}:\d{2}:\d{2}" class="input font-mono"></div>
+    <div><label class="field-label" for="v-b">Cámara B</label><select id="v-b" name="cam_b" class="input font-mono">{% for c in nodos %}<option {% if forloop.counter == 2 %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+    <div><label class="field-label" for="v-hb">Hora en B</label><input id="v-hb" name="hora_b" value="08:44:00" pattern="\d{2}:\d{2}:\d{2}" class="input font-mono"></div>
+    <button class="btn btn-primary">{% lucide "gauge" size=16 %} Calcular</button>
+  </form>
+  <div id="resultado-velocidad" class="mt-4"></div>
+</section>
+{% endif %}
+{% endblock %}

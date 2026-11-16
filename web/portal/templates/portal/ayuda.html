@@ -1,0 +1,54 @@
+{% extends "portal/base_portal.html" %}
+{% block pagina %}Ayuda{% endblock %}
+{% block contenido %}
+<div x-data="{
+  q: '', tema: '', abierta: 0,
+  preguntas: [
+    { t: 'velocidad', p: '¿Cómo se calcula la velocidad de mi vehículo?', r: 'Usamos dos cámaras por las que pasaste. Dividimos la distancia más corta posible entre ellas por el tiempo transcurrido, y a ese tiempo le sumamos un margen por posibles errores de reloj. Así obtenemos la velocidad más baja que pudiste tener; solo si aun así supera el límite más 5 km/h de tolerancia se registra la infracción.' },
+    { t: 'revisiones', p: '¿Qué hago si la placa fue mal leída?', r: 'Abre el detalle de la papeleta y elige «Solicitar revisión» con el motivo «La placa fue mal leída». Adjunta una foto de tu placa o la tarjeta de propiedad.' },
+    { t: 'revisiones', p: '¿Cuánto tarda la respuesta a una solicitud de revisión?', r: 'Un máximo de 7 días hábiles. Mientras tanto la papeleta queda en estado «En revisión».' },
+    { t: 'consultas', p: '¿Por qué no veo una papeleta que me notificaron?', r: 'Solo se muestran papeletas ya validadas y emitidas. Verifica que la placa esté bien escrita (formato ABC-123).' },
+    { t: 'evidencia', p: '¿Quién revisa las infracciones antes de emitirlas?', r: 'Un validador del equipo revisa todas las imágenes y el análisis de la ruta. Ninguna papeleta se emite de forma automática.' },
+    { t: 'evidencia', p: '¿Qué pasa si la misma placa aparece en dos lugares a la vez?', r: 'Si recorrer la distancia entre ambas cámaras en ese tiempo exigiría más de 200 km/h, no se registra una infracción: se genera una alerta interna de posible placa clonada o error de lectura para que una persona la revise.' },
+    { t: 'privacidad', p: '¿Cómo protegen mis datos personales?', r: 'Los datos se tratan según la Ley N.° 29733. La consulta no requiere registro y solo muestra la evidencia de cada infracción de la placa consultada.' },
+  ],
+  get visibles() { const q = this.q.toLowerCase(); return this.preguntas.filter(x => (!this.tema || x.t === this.tema) && (!q || (x.p + x.r).toLowerCase().includes(q))); }
+}">
+  <section class="border-b border-border bg-surface">
+    <div class="mx-auto max-w-[960px] px-4 py-12 text-center md:py-14">
+      <h1 class="text-[28px] font-bold tracking-tight md:text-[32px]">¿En qué podemos ayudarte?</h1>
+      <div class="relative mx-auto mt-6 max-w-[560px]">
+        <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-text-muted">{% lucide "search" size=18 %}</span>
+        <input type="search" x-model="q" placeholder="Busca por ejemplo: revisión, plazo, placa mal leída" aria-label="Buscar en la ayuda" class="input h-12 pl-11">
+      </div>
+      <div class="mt-4 flex flex-wrap justify-center gap-2">
+        <template x-for="[v, n] in [['', 'Todas'], ['consultas', 'Consultas'], ['evidencia', 'Evidencia'], ['revisiones', 'Revisiones'], ['velocidad', 'Velocidad'], ['privacidad', 'Privacidad']]">
+          <button type="button" class="chip h-10 md:h-8" :class="tema === v && 'chip-activo'" @click="tema = v; abierta = null" x-text="n" :aria-pressed="tema === v"></button>
+        </template>
+      </div>
+    </div>
+  </section>
+  <div class="mx-auto grid max-w-[1040px] gap-6 px-4 py-10 lg:grid-cols-[1fr_340px]">
+    <div class="card self-start overflow-hidden">
+      <template x-for="(x, n) in visibles" :key="x.p">
+        <div class="border-b border-border last:border-0">
+          <button type="button" class="flex min-h-14 w-full items-center gap-3 px-5 text-left font-semibold" :class="abierta === n && 'bg-surface-muted'" @click="abierta = abierta === n ? null : n" :aria-expanded="abierta === n">
+            <span class="flex-1 py-3" x-text="x.p"></span>
+            <span class="text-text-muted transition-transform" :class="abierta === n && 'rotate-180'">{% lucide "chevron-down" size=18 %}</span>
+          </button>
+          <p x-show="abierta === n" class="bg-surface-muted px-5 pb-4 text-text-secondary" x-text="x.r"></p>
+        </div>
+      </template>
+      <p x-show="!visibles.length" class="px-5 py-10 text-center text-text-secondary">No encontramos preguntas con ese texto.</p>
+    </div>
+    <aside class="card card-pad self-start">
+      <span class="flex size-11 items-center justify-center rounded-full bg-primary-subtle text-primary-text">{% lucide "mail" size=20 %}</span>
+      <h2 class="mt-4 text-base font-semibold">¿No encontraste tu respuesta?</h2>
+      <p class="mt-2 text-text-secondary">Escríbenos y te respondemos en un máximo de 2 días hábiles.</p>
+      <p class="mt-4 flex items-center gap-2 font-mono text-[13px]">{% lucide "mail" size=16 %} ayuda@fotopapeleta.pe</p>
+      <p class="mt-2 flex items-center gap-2 text-[13px] text-text-secondary">{% lucide "clock-3" size=16 %} Lunes a viernes, 8:00 – 18:00</p>
+      <a href="mailto:ayuda@fotopapeleta.pe" class="btn btn-primary mt-5 w-full">{% lucide "send" size=16 %} Escribir a soporte</a>
+    </aside>
+  </div>
+</div>
+{% endblock %}

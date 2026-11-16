@@ -1,0 +1,80 @@
+{% extends "panel/base_panel.html" %}
+{% block pagina %}{{ inf.codigo }}{% endblock %}
+{% block migas %}
+  <a href="{% url 'panel:infracciones' %}" class="hover:text-text max-sm:hidden">Infracciones</a>
+  <span class="max-sm:hidden">{% lucide "chevron-right" size=14 %}</span>
+  <span class="font-mono font-semibold text-text">{{ inf.codigo }}</span>
+{% endblock %}
+{% block contenido %}
+<div x-data="{ anular: false }">
+  <a href="{% url 'panel:infracciones' %}" class="inline-flex items-center gap-2 font-medium text-primary-text">{% lucide "chevron-left" size=16 %} Volver a infracciones</a>
+
+  <div class="mt-4 flex flex-col gap-5 xl:flex-row xl:items-center">
+    <div class="flex flex-1 flex-col gap-4 sm:flex-row sm:items-center">
+      {% placa_grande inf.placa "md" %}
+      <div>
+        <div class="flex flex-wrap items-center gap-3"><h1 class="font-mono text-[28px] font-semibold">{{ inf.codigo }}</h1>{% badge_estado inf.estado %}{% if inf.escalada %}{% badge_estado "escalada" %}{% endif %}</div>
+        <p class="mt-1 flex flex-wrap items-center gap-2 text-text-secondary">{% icono_tipo inf.tipo %} {{ inf.tipo|nombre_tipo }}
+          {% if papeleta %}<span>·</span><a href="{% url 'portal:detalle' papeleta.numero %}" class="font-mono font-semibold text-primary-text hover:underline">Papeleta {{ papeleta.numero }}</a>{% endif %}</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      {% if papeleta and papeleta.estado != "anulada" and puede_anular %}
+        <button type="button" class="btn btn-ghost text-danger hover:text-danger" @click="anular = true">{% lucide "ban" size=16 %} Anular papeleta</button>
+      {% endif %}
+      {% if papeleta %}<a href="{% url 'portal:imprimir' papeleta.numero %}" target="_blank" class="btn btn-primary">{% lucide "download" size=16 %} Descargar PDF</a>{% endif %}
+    </div>
+  </div>
+
+  <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
+    {% include "componentes/evidencia.html" with miniaturas=miniaturas %}
+    <section class="card card-pad self-start">
+      <h2 class="text-xl font-semibold">Resumen del análisis</h2>
+      {% if analisis %}
+      <dl class="mt-4 flex flex-col gap-3.5">
+        <div><dt class="text-xs text-text-secondary">Trayectoria</dt><dd class="font-mono text-[13px]">{% for c in capturas %}{{ c.camara_id }}{% if not forloop.last %} → {% endif %}{% endfor %}</dd></div>
+        <div><dt class="text-xs text-text-secondary">Distancia mínima ({{ analisis.algoritmo }})</dt><dd class="font-mono text-[13px]">{{ analisis.ruta|join:" → " }} · {{ analisis.km|num }} km</dd></div>
+        <div><dt class="text-xs text-text-secondary">Tiempo entre capturas</dt><dd class="font-mono text-[13px]">{{ analisis.segundos|duracion }} (+ {{ analisis.error_reloj_s|num:0 }} s × 2 de margen)</dd></div>
+        <div><dt class="text-xs text-text-secondary">Velocidad medida / conservadora</dt><dd class="font-mono text-[13px]">{{ analisis.v_medida|num }} / {{ analisis.v_conservadora|num }} km/h</dd></div>
+        <div><dt class="text-xs text-text-secondary">Límite y tolerancia</dt><dd class="font-mono text-[13px]">{{ analisis.limite|num:0 }} km/h + {{ analisis.tolerancia_kmh|num:0 }} km/h</dd></div>
+        <div><dt class="text-xs text-text-secondary">Exceso</dt><dd class="font-mono text-[13px] font-semibold text-danger">+{{ analisis.exceso|num }} km/h</dd></div>
+        <div><dt class="text-xs text-text-secondary">Validada por</dt><dd class="font-mono text-[13px]">{% if aprobacion %}{{ aprobacion.validador|nombre_corto }} · {{ aprobacion.fecha|fecha_hora }}{% else %}—{% endif %}</dd></div>
+        <div><dt class="text-xs text-text-secondary">Placa</dt><dd class="font-mono text-[13px]">{% if inf.coincidencia == "a_verificar" %}A verificar{% else %}Confirmada{% endif %} · {{ capturas.0.lecturas_votadas }} de {{ capturas.0.lecturas_totales }} lecturas</dd></div>
+        <div><dt class="text-xs text-text-secondary">Versión del grafo</dt><dd class="font-mono text-[13px]">{{ analisis.version_grafo }}</dd></div>
+      </dl>
+      {% else %}<p class="mt-3 text-text-secondary">Esta infracción no tiene análisis del grafo.</p>{% endif %}
+    </section>
+  </div>
+
+  {% if analisis %}
+  <section class="card card-pad mt-6">
+    <h2 class="text-xl font-semibold">Ruta en la red de cámaras</h2>
+    <div class="mt-4 overflow-x-auto rounded-lg bg-surface-sunken p-2"><div class="min-w-[640px]">{% include "componentes/grafo.html" with g=grafo compacto=True %}</div></div>
+  </section>
+  {% endif %}
+
+  <h2 class="mt-8 text-xl font-semibold">Registro de auditoría</h2>
+  <p class="text-text-secondary">Cada acción queda registrada con su autor, la versión de los modelos y la del grafo.</p>
+  <div class="card mt-4 overflow-x-auto">
+    <table class="tabla">
+      <thead><tr><th>Fecha y hora</th><th>Actor</th><th>Acción</th><th>Detalle</th></tr></thead>
+      <tbody>
+        {% for ts, tipo, actor, accion, detalle in auditoria %}
+        <tr>
+          <td class="font-mono text-[13px] whitespace-nowrap">{{ ts|fecha_hora }}</td>
+          <td class="whitespace-nowrap"><span class="inline-flex items-center gap-2 text-[13px]"><span class="text-text-muted">{% if tipo == "persona" %}{% lucide "user" size=14 %}{% else %}{% lucide "cpu" size=14 %}{% endif %}</span>{{ actor }}</span></td>
+          <td class="font-semibold whitespace-nowrap">{{ accion }}</td>
+          <td class="py-2 font-mono text-xs text-text-secondary">{{ detalle }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if papeleta and puede_anular %}
+  <div x-show="anular" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @keydown.escape.window="anular = false">
+    {% include "panel/parciales/modal_anular.html" with numero=papeleta.numero %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

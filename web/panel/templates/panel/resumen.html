@@ -1,0 +1,130 @@
+{% extends "panel/base_panel.html" %}
+{% block pagina %}Resumen{% endblock %}
+{% block miga %}Resumen{% endblock %}
+{% block contenido %}
+<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="text-[28px] leading-tight font-semibold">Resumen de la operación</h1>
+    <p class="mt-1 text-text-secondary">{% if es_hoy %}Hoy, {{ dia|date:"l d/m/Y"|capfirst }}{% else %}Sin infracciones hoy · se muestra el {{ dia|date:"d/m/Y" }}, último día con registros{% endif %}</p>
+  </div>
+  <div class="flex gap-3">
+    <a href="{% url 'panel:exportar_infracciones' %}?desde={{ dia|date:'Y-m-d' }}&hasta={{ dia|date:'Y-m-d' }}" class="btn btn-secondary">{% lucide "download" size=16 %} Exportar</a>
+    <a href="{% url 'panel:validacion' %}" class="btn btn-primary">{% lucide "shield-check" size=16 %} Ir a validación</a>
+  </div>
+</div>
+
+{# 4 KpiCard #}
+<div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6" data-tour="kpis">
+  <div class="card card-pad">
+    <div class="flex items-start justify-between"><p class="text-[13px] text-text-secondary">Infracciones {% if es_hoy %}hoy{% else %}del día{% endif %}</p><span class="flex size-8 items-center justify-center rounded-md bg-primary-subtle text-primary-text">{% lucide "triangle-alert" size=18 %}</span></div>
+    <p class="mt-3 font-mono text-[32px] leading-none font-semibold">{{ kpi_hoy }}</p>
+    <p class="mt-3 flex items-center gap-1.5 text-xs font-medium {% if kpi_variacion is None %}text-text-muted{% elif kpi_variacion >= 0 %}text-success{% else %}text-danger{% endif %}">
+      {% if kpi_variacion is None %}{% lucide "minus" size=14 %} Sin datos del día anterior{% elif kpi_variacion >= 0 %}{% lucide "trending-up" size=14 %} +{{ kpi_variacion|floatformat:0 }} % vs. día anterior{% else %}{% lucide "trending-down" size=14 %} {{ kpi_variacion|floatformat:0 }} % vs. día anterior{% endif %}
+    </p>
+  </div>
+  <div class="card card-pad">
+    <div class="flex items-start justify-between"><p class="text-[13px] text-text-secondary">Pendientes de validación</p><span class="flex size-8 items-center justify-center rounded-md bg-warning-subtle text-warning">{% lucide "hourglass" size=18 %}</span></div>
+    <p class="mt-3 font-mono text-[32px] leading-none font-semibold">{{ kpi_pendientes }}</p>
+    <p class="mt-3 flex items-center gap-1.5 text-xs font-medium {% if mas_antigua %}text-warning{% else %}text-success{% endif %}">
+      {% if mas_antigua %}{% lucide "clock-3" size=14 %} Más antigua: {{ mas_antigua.creada|hace }}{% else %}{% lucide "circle-check" size=14 %} Cola al día{% endif %}
+    </p>
+  </div>
+  <div class="card card-pad">
+    <div class="flex items-start justify-between"><p class="text-[13px] text-text-secondary">Tasa de aprobación (7 días)</p><span class="flex size-8 items-center justify-center rounded-md bg-success-subtle text-success">{% lucide "circle-check" size=18 %}</span></div>
+    <p class="mt-3 font-mono text-[32px] leading-none font-semibold">{% if kpi_tasa is None %}—{% else %}{{ kpi_tasa|floatformat:0 }} %{% endif %}</p>
+    <p class="mt-3 text-xs font-medium text-text-muted">{{ kpi_decididas }} decisión{{ kpi_decididas|pluralize:"es" }} de validadores</p>
+  </div>
+  <div class="card card-pad">
+    <div class="flex items-start justify-between"><p class="text-[13px] text-text-secondary">Cámaras activas</p><span class="flex size-8 items-center justify-center rounded-md bg-info-subtle text-info">{% lucide "cctv" size=18 %}</span></div>
+    <p class="mt-3 font-mono text-[32px] leading-none font-semibold">{{ camaras_activas }} / {{ camaras|length }}</p>
+    <p class="mt-3 flex items-center gap-1.5 text-xs font-medium text-text-muted">{% lucide "waypoints" size=14 %} Nodos del grafo de evaluación</p>
+  </div>
+</div>
+
+<div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+  {# Región dominante: infracciones por hora apiladas por tipo #}
+  <section class="card card-pad" data-tour="grafico">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h2 class="text-xl font-semibold">Infracciones por hora</h2>
+        <p class="text-xs text-text-secondary">{{ dia|date:"d/m/Y" }} · {{ kpi_hoy }} en total</p>
+      </div>
+      <ul class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary">
+        {% for t in tipos_presentes %}<li class="flex items-center gap-1.5"><span class="size-2.5 rounded-sm bg-cat-{{ t }}"></span>{{ t|nombre_tipo }}</li>{% empty %}<li>Sin datos</li>{% endfor %}
+      </ul>
+    </div>
+    {% if kpi_hoy %}
+    <div class="mt-6 flex h-64 items-end gap-1.5 sm:gap-2" role="img" aria-label="Gráfico de infracciones por hora">
+      {% for b in barras %}
+        <div class="flex h-full flex-1 flex-col justify-end" title="{{ b.hora }}:00 · {{ b.total }} infracción{{ b.total|pluralize:'es' }}">
+          {% if b.total %}<span class="mb-1 text-center font-mono text-[11px] text-text-secondary">{{ b.total }}</span>{% endif %}
+          <div class="flex w-full flex-col-reverse overflow-hidden rounded-t-sm" style="height: {{ b.alto|stringformat:'.1f' }}%">
+            {% for t, n in b.partes %}<div class="min-h-1 bg-cat-{{ t }}" style="flex: {{ n }}"></div>{% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="mt-2 flex gap-1.5 sm:gap-2">{% for b in barras %}<span class="flex-1 text-center font-mono text-[11px] text-text-muted">{{ b.hora }}</span>{% endfor %}</div>
+    {% else %}
+      {% include "componentes/vacio.html" with icono="chart-column" titulo="Aún no hay infracciones" texto="Cuando el worker reporte capturas aparecerán aquí por hora." %}
+    {% endif %}
+  </section>
+
+  <section class="card card-pad flex flex-col" data-tour="cola">
+    <div class="flex items-start justify-between">
+      <div><h2 class="text-xl font-semibold">Cola de validación</h2><p class="text-xs text-text-secondary">{{ kpi_pendientes }} pendiente{{ kpi_pendientes|pluralize }} · más antiguas primero</p></div>
+      {% if kpi_pendientes %}<span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-white">{{ kpi_pendientes }}</span>{% endif %}
+    </div>
+    <ul class="mt-3 flex-1">
+      {% for f in cola %}
+        <li><a href="{% url 'panel:validacion_detalle' f.inf.pk %}" class="-mx-2 flex items-center gap-3 rounded-md border-b border-border px-2 py-3 hover:bg-surface-muted">
+          {% placa_sm f.inf.placa f.verificar %}
+          <div class="min-w-0 flex-1">
+            <p class="flex items-center gap-2 truncate">{% icono_tipo f.inf.tipo 14 %} {{ f.inf.tipo|nombre_tipo }}</p>
+            <p class="mt-0.5 text-xs text-text-muted">{{ f.camara.codigo }} · en espera {{ f.inf.creada|hace|cut:"hace " }}</p>
+          </div>
+          <span class="text-text-muted">{% lucide "chevron-right" size=16 %}</span>
+        </a></li>
+      {% empty %}
+        <li>{% include "componentes/vacio.html" with icono="shield-check" titulo="No hay infracciones pendientes" texto="Cuando el sistema detecte una nueva infracción aparecerá aquí para su revisión." %}</li>
+      {% endfor %}
+    </ul>
+    {% if cola %}<a href="{% url 'panel:validacion' %}" class="btn btn-secondary mt-4 w-full">{% lucide "shield-check" size=16 %} Abrir validación</a>{% endif %}
+  </section>
+</div>
+
+<div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+  <section class="card card-pad">
+    <h2 class="text-xl font-semibold">Infracciones por tipo</h2>
+    <p class="text-xs text-text-secondary">{{ dia|date:"d/m/Y" }}</p>
+    <ul class="mt-4 flex flex-col gap-3">
+      {% for t, n, ancho in por_tipo %}
+        <li class="grid grid-cols-[minmax(0,220px)_1fr_40px] items-center gap-4">
+          <span class="flex items-center gap-2 truncate text-[13px] {% if not n %}text-text-muted{% endif %}">{% icono_tipo t 14 %} {{ t|nombre_tipo }}</span>
+          <span class="h-2 rounded-full bg-surface-muted"><span class="block h-2 rounded-full bg-cat-{{ t }}" style="width: {{ ancho|stringformat:'.1f' }}%"></span></span>
+          <span class="text-right font-mono text-[13px]">{{ n }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+    <p class="mt-4 flex items-start gap-2 text-xs text-text-muted">{% lucide "info" size=14 %} En esta versión el sistema detecta exceso de velocidad por tramo; los demás tipos dependen de modelos aún no entrenados.</p>
+  </section>
+
+  <section class="card card-pad" data-tour="camaras">
+    <div class="flex items-start justify-between">
+      <div><h2 class="text-xl font-semibold">Estado de cámaras</h2><p class="text-xs text-text-secondary">{{ camaras_activas }} activas · {{ camaras|length }} en la red</p></div>
+      <a href="{% url 'panel:camaras' %}" class="btn btn-ghost btn-sm">{% lucide "map" size=16 %} Ver mapa</a>
+    </div>
+    <ul class="mt-3 flex flex-col gap-3">
+      {% for c in camaras %}
+        <li class="flex items-start gap-3">
+          <span class="mt-1.5 size-2 flex-none rounded-full {% if c.activa %}bg-camera-online{% else %}bg-camera-offline{% endif %}"></span>
+          <div>
+            <p class="text-[13px] font-semibold"><a href="{% url 'panel:camaras' %}?camara={{ c.codigo }}" class="hover:underline">{{ c.codigo }} · {{ c.nombre }}</a></p>
+            <p class="font-mono text-xs {% if c.activa %}text-text-muted{% else %}text-danger{% endif %}">{% if not c.activa %}Desactivada{% elif c.ultima %}Última captura {{ c.ultima|fecha_hora }}{% else %}Sin capturas aún{% endif %}</p>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "portal/base_portal.html" %}
+{% block pagina %}Papeleta {{ p.numero }}{% endblock %}
+{% block body_class %}flex min-h-dvh flex-col bg-bg pb-[170px] md:pb-0{% endblock %}
+{% block contenido %}
+<div class="mx-auto max-w-[1200px] px-4 py-6 md:py-10">
+  <a href="{% url 'portal:resultados' %}?placa={{ p.placa }}" class="inline-flex h-11 items-center gap-2 font-medium text-primary-text md:h-auto">{% lucide "chevron-left" size=16 %} Volver a resultados de {{ p.placa|placa }}</a>
+
+  <div class="mt-4 flex flex-col gap-5 lg:flex-row lg:items-center">
+    <div class="flex flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
+      {% placa_grande p.placa "lg" %}
+      <div>
+        <div class="flex flex-wrap items-center gap-3">
+          <h1 class="text-[22px] font-semibold md:text-[28px]">Papeleta {{ p.numero }}</h1>
+          {% badge_estado p.estado %}
+        </div>
+        <p class="mt-1 flex items-center gap-2 text-text-secondary">{% icono_tipo inf.tipo %} {{ inf.tipo|nombre_tipo }}</p>
+      </div>
+    </div>
+    {# Acciones: en móvil, barra fija inferior #}
+    <div class="fixed inset-x-0 bottom-[98px] z-20 flex gap-3 border-t border-border bg-surface p-4 md:static md:border-0 md:bg-transparent md:p-0">
+      {% if p.estado == "emitida" %}
+        <a href="{% url 'portal:revision' p.numero %}" class="btn btn-secondary btn-lg flex-1 md:flex-none">{% lucide "message-square" size=18 %} Solicitar revisión</a>
+      {% endif %}
+      <a href="{% url 'portal:imprimir' p.numero %}" target="_blank" class="btn btn-primary btn-lg flex-1 md:flex-none">{% lucide "download" size=18 %} Descargar PDF</a>
+    </div>
+  </div>
+
+  {% if p.estado == "anulada" %}
+    <div class="mt-6">{% include "componentes/banner.html" with tipo="info" titulo="Esta papeleta fue anulada" texto=p.motivo_anulacion %}</div>
+  {% elif p.estado == "en_revision" %}
+    <div class="mt-6">{% include "componentes/banner.html" with tipo="warning" titulo="Revisión en curso" texto="Recibimos tu solicitud. Te responderemos por correo en un plazo máximo de 7 días hábiles." %}</div>
+  {% endif %}
+
+  <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+    {% include "componentes/evidencia.html" with miniaturas=miniaturas sin_ocr=True %}
+
+    <div class="flex flex-col gap-6">
+      <section class="card card-pad">
+        <h2 class="text-xl font-semibold">Datos de la infracción</h2>
+        <dl class="mt-4 grid grid-cols-[120px_1fr] gap-x-4 gap-y-3 text-[14px]">
+          <dt class="text-text-secondary">Número</dt><dd class="font-mono">{{ p.numero }}</dd>
+          <dt class="text-text-secondary">Placa</dt><dd class="font-mono">{{ p.placa|placa }}</dd>
+          <dt class="text-text-secondary">Fecha y hora</dt><dd class="font-mono">{{ capturas.0.timestamp|fecha_hora }}</dd>
+          <dt class="text-text-secondary">Lugar</dt>
+          <dd>{% for c in capturas %}{{ c.camara.nombre }} ({{ c.camara_id }}){% if not forloop.last %} → {% endif %}{% endfor %}</dd>
+          <dt class="text-text-secondary">Emitida</dt><dd class="font-mono">{{ p.emitida|fecha_hora }}</dd>
+          <dt class="text-text-secondary">Validada por</dt><dd>{{ aprobacion.validador|nombre_corto }}</dd>
+        </dl>
+        {% if analisis %}
+        <div class="mt-5 grid grid-cols-3 gap-2 rounded-lg bg-surface-muted p-3 text-center">
+          <div><p class="text-xs text-text-secondary">Registrada</p><p class="font-mono text-lg font-semibold">{{ analisis.v_conservadora|num }} <span class="text-sm">km/h</span></p></div>
+          <div><p class="text-xs text-text-secondary">Límite</p><p class="font-mono text-lg font-semibold">{{ analisis.limite|num:0 }} <span class="text-sm">km/h</span></p></div>
+          <div><p class="text-xs text-text-secondary">Exceso</p><p class="font-mono text-lg font-semibold text-danger">+{{ analisis.exceso|num }}</p></div>
+        </div>
+        <p class="mt-3 text-xs text-text-secondary">La velocidad se calcula con la distancia mínima entre ambas cámaras y un margen de error de reloj de {{ analisis.error_reloj_s|num:0 }} s a tu favor.</p>
+        {% endif %}
+      </section>
+
+      <section class="card card-pad">
+        <h2 class="text-xl font-semibold">Historial</h2>
+        <ol class="mt-4">
+          {% for estado, titulo, texto, ts in historial %}
+          <li class="relative flex gap-3 pb-5 last:pb-0">
+            {% if not forloop.last %}<span class="absolute top-3 left-[4px] h-full w-0.5 bg-border"></span>{% endif %}
+            <span class="relative mt-1.5 size-2.5 flex-none rounded-full {% if estado == 'aprobada' %}bg-success{% elif estado == 'emitida' %}bg-primary{% elif estado == 'enriquecida' %}bg-info{% elif estado == 'en_revision' %}bg-warning{% elif estado == 'anulada' %}bg-text-muted{% else %}bg-text-secondary{% endif %}"></span>
+            <div>
+              <p class="font-semibold">{{ titulo }}</p>
+              <p class="text-[13px] text-text-secondary">{{ texto }}</p>
+              <p class="font-mono text-xs text-text-muted">{{ ts|fecha_hora }}</p>
+            </div>
+          </li>
+          {% endfor %}
+        </ol>
+      </section>
+    </div>
+  </div>
+
+  {% if analisis %}
+  <section class="card card-pad mt-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div>
+        <h2 class="text-xl font-semibold">Trayectoria reconstruida</h2>
+        <p class="mt-1 text-text-secondary">El vehículo pasó por {{ capturas.0.camara_id }} y {{ capturas.1.camara_id }}. La ruta más corta posible entre ambas es de {{ analisis.km|num }} km.</p>
+      </div>
+      <dl class="flex gap-6 text-right">
+        <div><dt class="text-xs text-text-secondary">Distancia mínima</dt><dd class="font-mono text-base font-semibold">{{ analisis.km|num }} km</dd></div>
+        <div><dt class="text-xs text-text-secondary">Tiempo</dt><dd class="font-mono text-base font-semibold">{{ analisis.segundos|duracion }}</dd></div>
+        <div><dt class="text-xs text-text-secondary">Velocidad</dt><dd class="font-mono text-base font-semibold">{{ analisis.v_conservadora|num }} km/h</dd></div>
+      </dl>
+    </div>
+    <div class="mt-4 overflow-x-auto rounded-lg bg-surface-sunken p-2">
+      <div class="min-w-[640px]">{% include "componentes/grafo.html" with g=grafo compacto=True aria="Trayectoria reconstruida en la red de cámaras" %}</div>
+    </div>
+  </section>
+  {% endif %}
+
+  <p class="mt-6 flex items-start gap-2 text-xs text-text-secondary">{% lucide "lock" size=14 %} Tus datos se tratan conforme a la Ley N.° 29733 de Protección de Datos Personales. Las imágenes solo muestran la evidencia de esta infracción.</p>
+</div>
+{% endblock %}

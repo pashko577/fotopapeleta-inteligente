@@ -1,0 +1,11 @@
+{
+  "nota": "Ubicación de las cámaras de fiscalización. Hoy: puntos de OpenStreetMap (Nominatim) que corresponden al nombre de cada cámara, aproximados. Para la demo, reemplazar lat/lon por el GPS de cada celular y ejecutar: python manage.py calcular_tramos && python manage.py importar_red ../data/grafo_camaras_real.json",
+  "nodos": {
+    "AV-01": {"nombre": "Av. Javier Prado", "lat": -12.09307, "lon": -77.03853, "limite_kmh": 60, "fuente": "OpenStreetMap: Av. Javier Prado Oeste, San Isidro"},
+    "AV-08": {"nombre": "Av. Arequipa", "lat": -12.08891, "lon": -77.03438, "limite_kmh": 60, "fuente": "OpenStreetMap: Av. Arequipa 2450, Lince"},
+    "AV-15": {"nombre": "Av. Angamos", "lat": -12.11385, "lon": -77.03187, "limite_kmh": 60, "fuente": "OpenStreetMap: Av. Angamos Oeste, Miraflores"},
+    "AV-02": {"nombre": "Av. Salaverry", "lat": -12.07657, "lon": -77.04208, "limite_kmh": 60, "fuente": "OpenStreetMap: Av. General Salaverry, Jesús María"},
+    "AV-12": {"nombre": "Av. Brasil", "lat": -12.06661, "lon": -77.04669, "limite_kmh": 60, "fuente": "OpenStreetMap: Av. Brasil, Jesús María"},
+    "PN-04": {"nombre": "Panamericana Norte", "lat": -11.99714, "lon": -77.05989, "limite_kmh": 80, "fuente": "OpenStreetMap: Panamericana Norte, Independencia"}
+  }
+}

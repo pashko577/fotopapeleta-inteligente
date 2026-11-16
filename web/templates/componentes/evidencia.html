@@ -1,0 +1,39 @@
+{# 8.4 EvidenceViewer. Parámetros: miniaturas = [(captura, url)], inicial (índice), sin_ocr, alto #}
+<div x-data="{ i: {{ inicial|default:0 }}, zoom: 1 }" class="min-w-0">
+  <div class="relative overflow-hidden rounded-xl bg-surface-sunken {{ alto|default:'aspect-video' }}">
+    {% for c, url in miniaturas %}
+      <div x-show="i === {{ forloop.counter0 }}" {% if not forloop.first %}x-cloak{% endif %} class="absolute inset-0 overflow-auto">
+        {% if url %}
+          <img src="{{ url }}" alt="Captura de {{ c.placa|placa }} en {{ c.camara_id }}, {{ c.timestamp|fecha_hora }}"
+               class="size-full origin-center object-contain transition-transform duration-200" :style="`transform: scale(${zoom})`">
+        {% else %}
+          <div class="flex size-full flex-col items-center justify-center gap-2 text-text-muted">{% lucide "image-off" size=40 %}<span>Imagen no disponible</span></div>
+        {% endif %}
+        <div class="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-x-5 gap-y-1 bg-[#0F172AB3] px-4 py-2.5 text-[13px] text-white">
+          <span class="inline-flex items-center gap-1.5">{% lucide "cctv" size=16 %} {{ c.camara_id }} · {{ c.camara.nombre }}</span>
+          <span class="inline-flex items-center gap-1.5 font-mono">{% lucide "clock-3" size=16 %} {{ c.timestamp|fecha_hora }}</span>
+          {% if not sin_ocr %}<span class="inline-flex items-center gap-1.5 font-mono">{% lucide "scan-text" size=16 %} OCR {{ c.placa_confianza|pct }} · {{ c.lecturas_votadas }} de {{ c.lecturas_totales }} lecturas</span>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+    <div class="absolute top-3 left-3 flex gap-1 rounded-lg bg-surface p-1 shadow-elev-2">
+      <button type="button" class="btn btn-ghost btn-icon btn-sm" @click="zoom = Math.min(zoom + .5, 3)" aria-label="Acercar" title="Acercar">{% lucide "zoom-in" size=18 %}</button>
+      <button type="button" class="btn btn-ghost btn-icon btn-sm" @click="zoom = Math.max(zoom - .5, 1)" aria-label="Alejar" title="Alejar">{% lucide "zoom-out" size=18 %}</button>
+      {% for c, url in miniaturas %}{% if url %}
+        <a x-show="i === {{ forloop.counter0 }}" href="{{ url }}" download class="btn btn-ghost btn-icon btn-sm" aria-label="Descargar imagen" title="Descargar imagen">{% lucide "download" size=18 %}</a>
+      {% endif %}{% endfor %}
+    </div>
+  </div>
+  {% if miniaturas|length > 1 %}
+  <div class="mt-3 flex gap-3 overflow-x-auto pb-1">
+    {% for c, url in miniaturas %}
+      <button type="button" @click="i = {{ forloop.counter0 }}; zoom = 1" class="flex-none text-left" :aria-pressed="i === {{ forloop.counter0 }}">
+        <span class="block h-[74px] w-[120px] overflow-hidden rounded-md border-2 bg-surface-sunken" :class="i === {{ forloop.counter0 }} ? 'border-primary' : 'border-transparent'">
+          {% if url %}<img src="{{ url }}" alt="" class="size-full object-cover">{% endif %}
+        </span>
+        <span class="mt-1 block font-mono text-xs text-text-muted">{{ c.camara_id }} · {{ c.timestamp|hora }}</span>
+      </button>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>

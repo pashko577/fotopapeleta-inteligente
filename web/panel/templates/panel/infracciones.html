@@ -1,0 +1,44 @@
+{% extends "panel/base_panel.html" %}
+{% block pagina %}Infracciones{% endblock %}
+{% block miga %}Infracciones{% endblock %}
+{% block contenido %}
+<div x-data="{ sel: [] }">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-[28px] leading-tight font-semibold">Infracciones</h1>
+      <p class="mt-1 text-text-secondary">{{ total }} registrada{{ total|pluralize }} · {{ pendientes }} pendiente{{ pendientes|pluralize }} de validación</p>
+    </div>
+    <a href="{% url 'panel:exportar_infracciones' %}{% url_con p=None %}" class="btn btn-secondary" data-tour="exportar">{% lucide "download" size=16 %} Exportar CSV</a>
+  </div>
+
+  {# Barra de filtros: cada cambio recarga solo la tabla (HTMX) #}
+  <form id="filtros" data-tour="filtros" method="get" class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))_minmax(0,1.6fr)]"
+        hx-get="{% url 'panel:infracciones' %}" hx-target="#tabla" hx-push-url="true" hx-trigger="change, keyup changed delay:400ms from:#f-q, submit">
+    <div><label class="field-label" for="f-q">Placa o ID</label>
+      <div class="relative"><span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-muted">{% lucide "search" size=16 %}</span>
+        <input id="f-q" name="q" value="{{ f.q }}" type="search" placeholder="Buscar placa o ID" class="input pl-9"></div></div>
+    <div><label class="field-label" for="f-tipo">Tipo</label>
+      <select id="f-tipo" name="tipo" class="input"><option value="">Todos los tipos</option>{% for v, n in tipos %}<option value="{{ v }}" {% if f.tipo == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+    <div><label class="field-label" for="f-estado">Estado</label>
+      <select id="f-estado" name="estado" class="input"><option value="">Todos</option>{% for v, n in estados %}<option value="{{ v }}" {% if f.estado == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+    <div><label class="field-label" for="f-camara">Cámara</label>
+      <select id="f-camara" name="camara" class="input"><option value="">Todas</option>{% for c in camaras %}<option value="{{ c.codigo }}" {% if f.camara == c.codigo %}selected{% endif %}>{{ c.codigo }}</option>{% endfor %}</select></div>
+    <div><span class="field-label">Rango de fechas</span>
+      <div class="flex items-center gap-2">
+        <input name="desde" type="date" value="{{ f.desde }}" aria-label="Desde" class="input font-mono text-[13px]">
+        <span class="text-text-muted">–</span>
+        <input name="hasta" type="date" value="{{ f.hasta }}" aria-label="Hasta" class="input font-mono text-[13px]">
+      </div></div>
+  </form>
+
+  <div id="tabla" class="mt-4" data-tour="tabla">{% include "panel/parciales/tabla_infracciones.html" %}</div>
+
+  {# Barra flotante de acciones: aparece al seleccionar filas #}
+  <div x-show="sel.length" x-cloak x-transition class="fixed bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-2xl bg-[#0F172A] px-4 py-2 text-white shadow-elev-3 dark:border dark:border-border">
+    <span class="pr-2 font-semibold whitespace-nowrap"><span x-text="sel.length"></span> seleccionada<span x-show="sel.length > 1">s</span></span>
+    <span class="h-6 w-px bg-white/20"></span>
+    <a :href="'{% url 'panel:exportar_infracciones' %}?ids=' + sel.join(',')" class="btn btn-sm text-white hover:bg-white/10">{% lucide "download" size=16 %} Exportar</a>
+    <button type="button" class="btn btn-icon btn-sm text-white hover:bg-white/10" @click="sel = []; document.querySelectorAll('[data-fila]').forEach(c => c.checked = false)" aria-label="Quitar selección" title="Quitar selección">{% lucide "x" size=16 %}</button>
+  </div>
+</div>
+{% endblock %}

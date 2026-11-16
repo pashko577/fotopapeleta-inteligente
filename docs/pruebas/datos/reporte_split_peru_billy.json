@@ -1,0 +1,24 @@
+{
+  "datasets": [
+    "peru_billy"
+  ],
+  "imagenes_entrada": 2626,
+  "grupos_sin_fuga": 927,
+  "grupos_con_mas_de_una_foto_de_origen": 23,
+  "umbral_dhash_bits": 6,
+  "semilla": 42,
+  "imagenes_por_split": {
+    "train": {
+      "peru_billy": 1968,
+      "total": 1968
+    },
+    "valid": {
+      "peru_billy": 137,
+      "total": 137
+    },
+    "test": {
+      "peru_billy": 98,
+      "total": 98
+    }
+  }
+}

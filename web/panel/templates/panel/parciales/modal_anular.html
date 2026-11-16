@@ -1,0 +1,16 @@
+{# Confirmación destructiva: anular papeleta con motivo obligatorio. Requiere una variable Alpine «anular» en el padre. #}
+<form method="post" action="{% url 'panel:anular_papeleta' numero %}" class="w-full max-w-[520px] rounded-2xl bg-surface shadow-elev-4" @click.outside="anular = false" role="dialog" aria-labelledby="titulo-anular">
+  {% csrf_token %}<input type="hidden" name="volver" value="{{ request.get_full_path }}">
+  <div class="flex gap-4 border-b border-border p-6">
+    <span class="flex size-11 flex-none items-center justify-center rounded-full bg-danger-subtle text-danger">{% lucide "ban" size=22 %}</span>
+    <div class="flex-1"><h2 id="titulo-anular" class="text-xl font-semibold">Anular papeleta <span class="font-mono">{{ numero }}</span></h2>
+      <p class="mt-1 text-text-secondary">La papeleta deja de tener efecto y el ciudadano verá el motivo. Esta acción no se puede deshacer.</p></div>
+    <button type="button" class="btn btn-ghost btn-icon" @click="anular = false" aria-label="Cerrar">{% lucide "x" size=18 %}</button>
+  </div>
+  <div class="p-6"><label class="field-label" for="motivo-anular-{{ numero }}">Motivo de la anulación (obligatorio)</label>
+    <textarea id="motivo-anular-{{ numero }}" name="motivo" rows="3" required minlength="10" class="input resize-none" placeholder="Por ejemplo: la revisión REV-000045 demostró que la placa fue mal leída."></textarea></div>
+  <div class="flex justify-end gap-3 rounded-b-2xl border-t border-border bg-surface-muted px-6 py-4">
+    <button type="button" class="btn btn-secondary" @click="anular = false">Cancelar</button>
+    <button class="btn btn-danger">{% lucide "ban" size=16 %} Anular papeleta</button>
+  </div>
+</form>

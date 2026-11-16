@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block titulo %}Ingreso del personal · FotoPapeleta{% endblock %}
+{% block body_class %}min-h-dvh bg-bg{% endblock %}
+{% block cuerpo %}
+<div class="grid min-h-dvh lg:grid-cols-[620px_1fr]">
+  <aside class="flex flex-col bg-[#1D4ED8] p-14 text-white max-lg:hidden">
+    {% include "componentes/marca.html" with invertida=True %}
+    <div class="my-auto">
+      <p class="text-4xl leading-tight font-bold tracking-tight">Fiscalización vial con evidencia trazable y validación humana.</p>
+      <ul class="mt-8 flex flex-col gap-4 text-white/90">
+        <li class="flex items-center gap-3"><span class="flex size-9 items-center justify-center rounded-md bg-white/15">{% lucide "cctv" size=18 %}</span>Detección con visión por computadora y lectura de placas</li>
+        <li class="flex items-center gap-3"><span class="flex size-9 items-center justify-center rounded-md bg-white/15">{% lucide "waypoints" size=18 %}</span>Búsqueda de evidencia en la red de cámaras con BFS, DFS y A*</li>
+        <li class="flex items-center gap-3"><span class="flex size-9 items-center justify-center rounded-md bg-white/15">{% lucide "shield-check" size=18 %}</span>Ninguna papeleta se emite sin revisión de una persona</li>
+      </ul>
+    </div>
+    <p class="text-xs text-white/75">Proyecto académico · Universidad Tecnológica del Perú · 2026</p>
+  </aside>
+
+  <main class="flex items-center justify-center px-4 py-10">
+    <form method="post" class="w-full max-w-[400px]" x-data="{ ver: false }" novalidate>
+      {% csrf_token %}
+      <div class="mb-8 lg:hidden">{% include "componentes/marca.html" %}</div>
+      <h1 class="text-[28px] font-semibold">Ingreso del personal</h1>
+      <p class="mt-1 text-text-secondary">Accede con tu cuenta institucional para validar infracciones.</p>
+
+      {% if form.errors %}
+        <div class="mt-6">{% include "componentes/banner.html" with tipo="danger" texto=form.non_field_errors.0|default:"Revisa los datos ingresados." %}</div>
+      {% endif %}
+
+      <div class="mt-6">
+        <label for="id_username" class="field-label">Usuario o correo electrónico</label>
+        <div class="relative">
+          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-muted">{% lucide "mail" size=16 %}</span>
+          <input id="id_username" name="username" value="{{ form.username.value|default:'' }}" autocomplete="username" autofocus required class="input pl-9" placeholder="r.sequeiros@utp.edu.pe">
+        </div>
+      </div>
+      <div class="mt-5">
+        <label for="id_password" class="field-label">Contraseña</label>
+        <div class="relative">
+          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-muted">{% lucide "lock" size=16 %}</span>
+          <input id="id_password" name="password" :type="ver ? 'text' : 'password'" type="password" autocomplete="current-password" required class="input px-9 {% if form.errors %}input-error{% endif %}">
+          <button type="button" class="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-text-muted hover:text-text" @click="ver = !ver" :aria-label="ver ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            <span x-show="!ver">{% lucide "eye" size=16 %}</span><span x-show="ver" x-cloak>{% lucide "eye-off" size=16 %}</span>
+          </button>
+        </div>
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn btn-primary btn-lg mt-6 w-full">{% lucide "log-in" size=18 %} Ingresar</button>
+      <a href="{% url 'portal:consulta' %}" class="mt-5 inline-flex items-center gap-1.5 text-[13px] text-text-secondary hover:text-text">{% lucide "chevron-left" size=14 %} Volver al portal ciudadano</a>
+    </form>
+  </main>
+</div>
+{% endblock %}

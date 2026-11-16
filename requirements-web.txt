@@ -1,0 +1,9 @@
+# Backend web y pantallas (verificado 16/10/2026)
+-r requirements.txt
+Django==5.2.18
+djangorestframework==3.18.3
+Pillow  # ImageField de las evidencias
+django-tailwind-cli==4.8.1  # Tailwind v4 sin Node: python manage.py tailwind build
+lucide==1.1.4               # íconos Lucide como SVG en las plantillas
+
+# Solo para capturas automáticas de las pantallas (usa el Edge instalado): pip install playwright==1.49.1

@@ -1,0 +1,495 @@
+{
+ "modelos": [
+  "cct-s-v2-global-model",
+  "cct-xs-v2-global-model",
+  "global-plates-mobile-vit-v2-model"
+ ],
+ "ms_por_placa": {
+  "easyocr": 38.8,
+  "cct-s-v2-global-model": 15.1,
+  "cct-xs-v2-global-model": 3.3,
+  "global-plates-mobile-vit-v2-model": 6.2
+ },
+ "resultados": {
+  "autos_todas": {
+   "easyocr": {
+    "n": 30,
+    "exactitud": 0.2333,
+    "cer": 0.5611,
+    "sin_lectura": 0.4333
+   },
+   "cct-s-v2-global-model_crudo": {
+    "n": 30,
+    "exactitud": 0.6667,
+    "cer": 0.0833,
+    "sin_lectura": 0.0
+   },
+   "cct-s-v2-global-model": {
+    "n": 30,
+    "exactitud": 0.7667,
+    "cer": 0.0667,
+    "sin_lectura": 0.0
+   },
+   "cct-xs-v2-global-model_crudo": {
+    "n": 30,
+    "exactitud": 0.8333,
+    "cer": 0.0556,
+    "sin_lectura": 0.0
+   },
+   "cct-xs-v2-global-model": {
+    "n": 30,
+    "exactitud": 0.8667,
+    "cer": 0.0722,
+    "sin_lectura": 0.0333
+   },
+   "global-plates-mobile-vit-v2-model_crudo": {
+    "n": 30,
+    "exactitud": 0.5,
+    "cer": 0.1222,
+    "sin_lectura": 0.0
+   },
+   "global-plates-mobile-vit-v2-model": {
+    "n": 30,
+    "exactitud": 0.5333,
+    "cer": 0.1111,
+    "sin_lectura": 0.0
+   }
+  },
+  "autos_80px_o_mas": {
+   "easyocr": {
+    "n": 13,
+    "exactitud": 0.3846,
+    "cer": 0.3462,
+    "sin_lectura": 0.1538
+   },
+   "cct-s-v2-global-model_crudo": {
+    "n": 13,
+    "exactitud": 0.6923,
+    "cer": 0.0513,
+    "sin_lectura": 0.0
+   },
+   "cct-s-v2-global-model": {
+    "n": 13,
+    "exactitud": 0.7692,
+    "cer": 0.0385,
+    "sin_lectura": 0.0
+   },
+   "cct-xs-v2-global-model_crudo": {
+    "n": 13,
+    "exactitud": 0.9231,
+    "cer": 0.0128,
+    "sin_lectura": 0.0
+   },
+   "cct-xs-v2-global-model": {
+    "n": 13,
+    "exactitud": 0.9231,
+    "cer": 0.0128,
+    "sin_lectura": 0.0
+   },
+   "global-plates-mobile-vit-v2-model_crudo": {
+    "n": 13,
+    "exactitud": 0.6154,
+    "cer": 0.0897,
+    "sin_lectura": 0.0
+   },
+   "global-plates-mobile-vit-v2-model": {
+    "n": 13,
+    "exactitud": 0.6154,
+    "cer": 0.0769,
+    "sin_lectura": 0.0
+   }
+  }
+ },
+ "detalle": [
+  {
+   "id": "1",
+   "real": "V8D001",
+   "ancho_px": 103,
+   "certeza": "alta",
+   "easyocr": "V8D001",
+   "cct-s-v2-global-model_crudo": "V8D001",
+   "cct-s-v2-global-model": "V8D001",
+   "cct-xs-v2-global-model_crudo": "V8D001",
+   "cct-xs-v2-global-model": "V8D001",
+   "global-plates-mobile-vit-v2-model_crudo": "V8D001",
+   "global-plates-mobile-vit-v2-model": "V8D001"
+  },
+  {
+   "id": "4",
+   "real": "T3P298",
+   "ancho_px": 89,
+   "certeza": "alta",
+   "easyocr": "T3P298",
+   "cct-s-v2-global-model_crudo": "T3P298",
+   "cct-s-v2-global-model": "T3P298",
+   "cct-xs-v2-global-model_crudo": "T3P298",
+   "cct-xs-v2-global-model": "T3P298",
+   "global-plates-mobile-vit-v2-model_crudo": "T3P298",
+   "global-plates-mobile-vit-v2-model": "T3P298"
+  },
+  {
+   "id": "5",
+   "real": "T5S457",
+   "ancho_px": 106,
+   "certeza": "alta",
+   "easyocr": "T5S457",
+   "cct-s-v2-global-model_crudo": "T5S457",
+   "cct-s-v2-global-model": "T5S457",
+   "cct-xs-v2-global-model_crudo": "T5S457",
+   "cct-xs-v2-global-model": "T5S457",
+   "global-plates-mobile-vit-v2-model_crudo": "TSS457",
+   "global-plates-mobile-vit-v2-model": "TSS457"
+  },
+  {
+   "id": "6",
+   "real": "F5M801",
+   "ancho_px": 91,
+   "certeza": "alta",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "C5M801",
+   "cct-s-v2-global-model": "C5M801",
+   "cct-xs-v2-global-model_crudo": "F5M801",
+   "cct-xs-v2-global-model": "F5M801",
+   "global-plates-mobile-vit-v2-model_crudo": "E5M801",
+   "global-plates-mobile-vit-v2-model": "E5M801"
+  },
+  {
+   "id": "7",
+   "real": "T1A093",
+   "ancho_px": 49,
+   "certeza": "alta",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "T1A093",
+   "cct-s-v2-global-model": "T1A093",
+   "cct-xs-v2-global-model_crudo": "T1A093",
+   "cct-xs-v2-global-model": "T1A093",
+   "global-plates-mobile-vit-v2-model_crudo": "TIA093",
+   "global-plates-mobile-vit-v2-model": "TIA093"
+  },
+  {
+   "id": "8",
+   "real": "Z1O703",
+   "ancho_px": 61,
+   "certeza": "media",
+   "easyocr": "Z1O703",
+   "cct-s-v2-global-model_crudo": "Z10703",
+   "cct-s-v2-global-model": "Z1O703",
+   "cct-xs-v2-global-model_crudo": "Z10703",
+   "cct-xs-v2-global-model": "Z1O703",
+   "global-plates-mobile-vit-v2-model_crudo": "Z10703",
+   "global-plates-mobile-vit-v2-model": "Z1O703"
+  },
+  {
+   "id": "9",
+   "real": "V9Z727",
+   "ancho_px": 69,
+   "certeza": "alta",
+   "easyocr": "O9Z727",
+   "cct-s-v2-global-model_crudo": "V9Z727",
+   "cct-s-v2-global-model": "V9Z727",
+   "cct-xs-v2-global-model_crudo": "V9Z727",
+   "cct-xs-v2-global-model": "V9Z727",
+   "global-plates-mobile-vit-v2-model_crudo": "V9Z727",
+   "global-plates-mobile-vit-v2-model": "V9Z727"
+  },
+  {
+   "id": "12",
+   "real": "A6G729",
+   "ancho_px": 45,
+   "certeza": "alta",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "A6G729",
+   "cct-s-v2-global-model": "A6G729",
+   "cct-xs-v2-global-model_crudo": "A6G729",
+   "cct-xs-v2-global-model": "A6G729",
+   "global-plates-mobile-vit-v2-model_crudo": "AAG729",
+   "global-plates-mobile-vit-v2-model": "AAG729"
+  },
+  {
+   "id": "13",
+   "real": "V2E962",
+   "ancho_px": 61,
+   "certeza": "alta",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "V2E962",
+   "cct-s-v2-global-model": "V2E962",
+   "cct-xs-v2-global-model_crudo": "V2E962",
+   "cct-xs-v2-global-model": "V2E962",
+   "global-plates-mobile-vit-v2-model_crudo": "V2E962",
+   "global-plates-mobile-vit-v2-model": "V2E962"
+  },
+  {
+   "id": "14",
+   "real": "D9M958",
+   "ancho_px": 44,
+   "certeza": "alta",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "D9M958",
+   "cct-s-v2-global-model": "D9M958",
+   "cct-xs-v2-global-model_crudo": "D9M958",
+   "cct-xs-v2-global-model": "D9M958",
+   "global-plates-mobile-vit-v2-model_crudo": "DDM958",
+   "global-plates-mobile-vit-v2-model": "DDM958"
+  },
+  {
+   "id": "16",
+   "real": "T2X611",
+   "ancho_px": 49,
+   "certeza": "media",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "T2X615",
+   "cct-s-v2-global-model": "T2X615",
+   "cct-xs-v2-global-model_crudo": "T2X611",
+   "cct-xs-v2-global-model": "T2X611",
+   "global-plates-mobile-vit-v2-model_crudo": "12X611",
+   "global-plates-mobile-vit-v2-model": "I2X611"
+  },
+  {
+   "id": "21",
+   "real": "T7C417",
+   "ancho_px": 40,
+   "certeza": "media",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "VYC417",
+   "cct-s-v2-global-model": "VYC417",
+   "cct-xs-v2-global-model_crudo": "LXL417",
+   "cct-xs-v2-global-model": "LXL417",
+   "global-plates-mobile-vit-v2-model_crudo": "116417",
+   "global-plates-mobile-vit-v2-model": "I1G417"
+  },
+  {
+   "id": "28",
+   "real": "T9T829",
+   "ancho_px": 83,
+   "certeza": "alta",
+   "easyocr": "G2B201",
+   "cct-s-v2-global-model_crudo": "T9T829",
+   "cct-s-v2-global-model": "T9T829",
+   "cct-xs-v2-global-model_crudo": "T9T829",
+   "cct-xs-v2-global-model": "T9T829",
+   "global-plates-mobile-vit-v2-model_crudo": "T9T829",
+   "global-plates-mobile-vit-v2-model": "T9T829"
+  },
+  {
+   "id": "34",
+   "real": "M6B742",
+   "ancho_px": 80,
+   "certeza": "alta",
+   "easyocr": "I6B744",
+   "cct-s-v2-global-model_crudo": "M6B742",
+   "cct-s-v2-global-model": "M6B742",
+   "cct-xs-v2-global-model_crudo": "M6B742",
+   "cct-xs-v2-global-model": "M6B742",
+   "global-plates-mobile-vit-v2-model_crudo": "MGB742",
+   "global-plates-mobile-vit-v2-model": "MGB742"
+  },
+  {
+   "id": "36",
+   "real": "A1F813",
+   "ancho_px": 65,
+   "certeza": "alta",
+   "easyocr": "IMF813",
+   "cct-s-v2-global-model_crudo": "A1F813",
+   "cct-s-v2-global-model": "A1F813",
+   "cct-xs-v2-global-model_crudo": "A1F813",
+   "cct-xs-v2-global-model": "A1F813",
+   "global-plates-mobile-vit-v2-model_crudo": "AIF813",
+   "global-plates-mobile-vit-v2-model": "AIF813"
+  },
+  {
+   "id": "37",
+   "real": "D1F123",
+   "ancho_px": 67,
+   "certeza": "media",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "D1F123",
+   "cct-s-v2-global-model": "D1F123",
+   "cct-xs-v2-global-model_crudo": "D1F123",
+   "cct-xs-v2-global-model": "D1F123",
+   "global-plates-mobile-vit-v2-model_crudo": "D1F123",
+   "global-plates-mobile-vit-v2-model": "D1F123"
+  },
+  {
+   "id": "38",
+   "real": "A4V293",
+   "ancho_px": 103,
+   "certeza": "alta",
+   "easyocr": "J4I203",
+   "cct-s-v2-global-model_crudo": "A4Y293",
+   "cct-s-v2-global-model": "A4Y293",
+   "cct-xs-v2-global-model_crudo": "A4V293",
+   "cct-xs-v2-global-model": "A4V293",
+   "global-plates-mobile-vit-v2-model_crudo": "AAY293",
+   "global-plates-mobile-vit-v2-model": "AAY293"
+  },
+  {
+   "id": "39",
+   "real": "A2W767",
+   "ancho_px": 54,
+   "certeza": "alta",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "A2W767",
+   "cct-s-v2-global-model": "A2W767",
+   "cct-xs-v2-global-model_crudo": "A2W767",
+   "cct-xs-v2-global-model": "A2W767",
+   "global-plates-mobile-vit-v2-model_crudo": "A2W767",
+   "global-plates-mobile-vit-v2-model": "A2W767"
+  },
+  {
+   "id": "43",
+   "real": "BPO306",
+   "ancho_px": 95,
+   "certeza": "media",
+   "easyocr": "BPO306",
+   "cct-s-v2-global-model_crudo": "BPO306",
+   "cct-s-v2-global-model": "BPO306",
+   "cct-xs-v2-global-model_crudo": "BPO306",
+   "cct-xs-v2-global-model": "BPO306",
+   "global-plates-mobile-vit-v2-model_crudo": "BPO306",
+   "global-plates-mobile-vit-v2-model": "BPO306"
+  },
+  {
+   "id": "45",
+   "real": "APU293",
+   "ancho_px": 57,
+   "certeza": "media",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "APU293",
+   "cct-s-v2-global-model": "APU293",
+   "cct-xs-v2-global-model_crudo": "APU293",
+   "cct-xs-v2-global-model": "APU293",
+   "global-plates-mobile-vit-v2-model_crudo": "APU293",
+   "global-plates-mobile-vit-v2-model": "APU293"
+  },
+  {
+   "id": "50",
+   "real": "D9R052",
+   "ancho_px": 95,
+   "certeza": "alta",
+   "easyocr": "D9R052",
+   "cct-s-v2-global-model_crudo": "D9R052",
+   "cct-s-v2-global-model": "D9R052",
+   "cct-xs-v2-global-model_crudo": "D9R052",
+   "cct-xs-v2-global-model": "D9R052",
+   "global-plates-mobile-vit-v2-model_crudo": "D9R052",
+   "global-plates-mobile-vit-v2-model": "D9R052"
+  },
+  {
+   "id": "52",
+   "real": "BAN767",
+   "ancho_px": 71,
+   "certeza": "alta",
+   "easyocr": "BAB762",
+   "cct-s-v2-global-model_crudo": "BAN767",
+   "cct-s-v2-global-model": "BAN767",
+   "cct-xs-v2-global-model_crudo": "BAN767",
+   "cct-xs-v2-global-model": "BAN767",
+   "global-plates-mobile-vit-v2-model_crudo": "BAN767",
+   "global-plates-mobile-vit-v2-model": "BAN767"
+  },
+  {
+   "id": "53",
+   "real": "A3Y857",
+   "ancho_px": 267,
+   "certeza": "alta",
+   "easyocr": "A3V857",
+   "cct-s-v2-global-model_crudo": "A3V857",
+   "cct-s-v2-global-model": "A3V857",
+   "cct-xs-v2-global-model_crudo": "A3V857",
+   "cct-xs-v2-global-model": "A3V857",
+   "global-plates-mobile-vit-v2-model_crudo": "B3Y8577",
+   "global-plates-mobile-vit-v2-model": "B3Y857"
+  },
+  {
+   "id": "54",
+   "real": "CHO002",
+   "ancho_px": 79,
+   "certeza": "media",
+   "easyocr": "CHO002",
+   "cct-s-v2-global-model_crudo": "CH0002",
+   "cct-s-v2-global-model": "CHO002",
+   "cct-xs-v2-global-model_crudo": "CHO002",
+   "cct-xs-v2-global-model": "CHO002",
+   "global-plates-mobile-vit-v2-model_crudo": "CHO002",
+   "global-plates-mobile-vit-v2-model": "CHO002"
+  },
+  {
+   "id": "55",
+   "real": "T5D655",
+   "ancho_px": 44,
+   "certeza": "media",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "TSB655",
+   "cct-s-v2-global-model": "TSB655",
+   "cct-xs-v2-global-model_crudo": "TSB635",
+   "cct-xs-v2-global-model": "TSB635",
+   "global-plates-mobile-vit-v2-model_crudo": "YSU655",
+   "global-plates-mobile-vit-v2-model": "YSU655"
+  },
+  {
+   "id": "58",
+   "real": "T3W091",
+   "ancho_px": 58,
+   "certeza": "media",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "T3W091",
+   "cct-s-v2-global-model": "T3W091",
+   "cct-xs-v2-global-model_crudo": "T3W091",
+   "cct-xs-v2-global-model": "T3W091",
+   "global-plates-mobile-vit-v2-model_crudo": "Y3W091",
+   "global-plates-mobile-vit-v2-model": "Y3W091"
+  },
+  {
+   "id": "59",
+   "real": "T6J611",
+   "ancho_px": 43,
+   "certeza": "media",
+   "easyocr": "U6A621",
+   "cct-s-v2-global-model_crudo": "YBJ6221",
+   "cct-s-v2-global-model": "YBJ622",
+   "cct-xs-v2-global-model_crudo": "TS3611",
+   "cct-xs-v2-global-model": "",
+   "global-plates-mobile-vit-v2-model_crudo": "Y6J6211",
+   "global-plates-mobile-vit-v2-model": "Y6J621"
+  },
+  {
+   "id": "64",
+   "real": "ADI198",
+   "ancho_px": 85,
+   "certeza": "alta",
+   "easyocr": "",
+   "cct-s-v2-global-model_crudo": "ADI198",
+   "cct-s-v2-global-model": "ADI198",
+   "cct-xs-v2-global-model_crudo": "ADI198",
+   "cct-xs-v2-global-model": "ADI198",
+   "global-plates-mobile-vit-v2-model_crudo": "ADI198",
+   "global-plates-mobile-vit-v2-model": "ADI198"
+  },
+  {
+   "id": "66",
+   "real": "BFE469",
+   "ancho_px": 91,
+   "certeza": "alta",
+   "easyocr": "BFE162",
+   "cct-s-v2-global-model_crudo": "BFE469",
+   "cct-s-v2-global-model": "BFE469",
+   "cct-xs-v2-global-model_crudo": "BFE469",
+   "cct-xs-v2-global-model": "BFE469",
+   "global-plates-mobile-vit-v2-model_crudo": "BFE469",
+   "global-plates-mobile-vit-v2-model": "BFE469"
+  },
+  {
+   "id": "67",
+   "real": "V8O842",
+   "ancho_px": 84,
+   "certeza": "media",
+   "easyocr": "W8O842",
+   "cct-s-v2-global-model_crudo": "V80842",
+   "cct-s-v2-global-model": "V8O842",
+   "cct-xs-v2-global-model_crudo": "V8O842",
+   "cct-xs-v2-global-model": "V8O842",
+   "global-plates-mobile-vit-v2-model_crudo": "V8O842",
+   "global-plates-mobile-vit-v2-model": "V8O842"
+  }
+ ]
+}

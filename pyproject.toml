@@ -1,0 +1,9 @@
+[project]
+name = "fotopapeleta"
+version = "0.1.0"
+description = "FotoPapeleta Inteligente: detección de infracciones y búsqueda de evidencia en una red de cámaras"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

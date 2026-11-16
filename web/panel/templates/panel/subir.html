@@ -1,0 +1,104 @@
+{% extends "panel/base_panel.html" %}
+{% block pagina %}Subir evidencia{% endblock %}
+{% block miga %}Subir evidencia{% endblock %}
+{% block contenido %}
+<div class="flex flex-col gap-1">
+  <h1 class="text-[28px] leading-tight font-semibold">Subir evidencia</h1>
+  <p class="text-text-secondary">Una foto o un video de una cámara pasa por el mismo detector y OCR del worker, y cada placa entra al sistema como una captura.</p>
+</div>
+
+<div class="mt-6 grid gap-6 xl:grid-cols-[440px_minmax(0,1fr)]">
+  <form method="post" enctype="multipart/form-data" novalidate class="card card-pad self-start" data-tour="formulario"
+        x-data="{ enviando: false, archivo: '', esVideo: false, manual: {% if form.placa_manual.value %}true{% else %}false{% endif %} }" @submit="enviando = true">
+    {% csrf_token %}
+    <h2 class="text-xl font-semibold">Datos de la captura</h2>
+    {% if form.non_field_errors %}<div class="mt-4">{% include "componentes/banner.html" with tipo="danger" texto=form.non_field_errors.0 %}</div>{% endif %}
+
+    <div class="mt-4">
+      <label class="field-label" for="id_camara">Cámara que tomó la imagen</label>
+      <select id="id_camara" name="camara" class="input">
+        {% for c in camaras %}<option value="{{ c.codigo }}" {% if form.camara.value == c.codigo %}selected{% endif %}>{{ c.codigo }} · {{ c.nombre }}</option>{% endfor %}
+      </select>
+    </div>
+
+    <label class="mt-4 flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-6 text-center hover:border-primary {% if form.archivo.errors %}border-danger{% else %}border-border-strong{% endif %} bg-surface-muted">
+      <span class="flex size-10 items-center justify-center rounded-full bg-surface text-primary-text shadow-elev-1">{% lucide "upload" size=18 %}</span>
+      <span x-show="!archivo">Arrastra una foto o un video, o <span class="font-semibold text-primary-text">selecciónalo</span></span>
+      <span x-show="archivo" x-cloak class="flex items-center gap-2 font-semibold">
+        <span x-show="esVideo">{% lucide "video" size=16 %}</span><span x-show="!esVideo">{% lucide "image" size=16 %}</span><span x-text="archivo"></span></span>
+      <span class="text-xs text-text-secondary">JPG, PNG, MP4, AVI, MOV · máx. {{ max_mb }} MB · videos hasta {{ max_video }} s</span>
+      <input type="file" name="archivo" accept="image/*,video/*" class="sr-only"
+             @change="archivo = $el.files[0]?.name || ''; esVideo = ($el.files[0]?.type || '').startsWith('video')">
+    </label>
+    {% for e in form.archivo.errors %}<p class="mt-1.5 flex items-center gap-1.5 text-[13px] text-danger">{% lucide "circle-x" size=14 %} {{ e }}</p>{% endfor %}
+
+    <div class="mt-4">
+      <label class="field-label" for="id_fecha_hora">Fecha y hora de la captura</label>
+      <input id="id_fecha_hora" name="fecha_hora" type="datetime-local" step="1" value="{{ form.fecha_hora.value|default_if_none:''|stringformat:'s'|slice:':19' }}" class="input font-mono {% if form.fecha_hora.errors %}input-error{% endif %}">
+      <p class="mt-1.5 text-xs text-text-secondary">Si la dejas vacía se usa la hora de la foto (EXIF) o la hora actual. En un video es la hora del primer cuadro.</p>
+      {% for e in form.fecha_hora.errors %}<p class="mt-1.5 flex items-center gap-1.5 text-[13px] text-danger">{% lucide "circle-x" size=14 %} {{ e }}</p>{% endfor %}
+    </div>
+    <label class="mt-3 flex items-center gap-3 text-[13px]">
+      <input type="checkbox" name="usar_exif" class="size-[18px] accent-[var(--color-primary)]" {% if form.usar_exif.value or not form.is_bound %}checked{% endif %}>
+      Usar la hora guardada en la foto (EXIF) si existe
+    </label>
+
+    <div class="mt-5 border-t border-border pt-4" data-tour="manual">
+      <button type="button" class="flex items-center gap-2 text-[13px] font-semibold text-primary-text" @click="manual = !manual" :aria-expanded="manual">
+        {% lucide "pencil" size=14 %} ¿El OCR no la lee? Escribe la placa a mano
+      </button>
+      <div x-show="manual" x-cloak class="mt-3">
+        <label class="field-label" for="id_placa_manual">Placa</label>
+        <input id="id_placa_manual" name="placa_manual" value="{{ form.placa_manual.value|default:'' }}" maxlength="7" placeholder="ABC-123" class="input font-mono uppercase {% if form.placa_manual.errors %}input-error{% endif %}">
+        <p class="mt-1.5 text-xs text-text-secondary">No se usa el detector: la captura queda marcada como «placa escrita por una persona» y la foto (si la subes) va como evidencia.</p>
+        {% for e in form.placa_manual.errors %}<p class="mt-1.5 flex items-center gap-1.5 text-[13px] text-danger">{% lucide "circle-x" size=14 %} {{ e }}</p>{% endfor %}
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-lg mt-6 w-full" :disabled="enviando">
+      <span x-show="!enviando" class="inline-flex items-center gap-2">{% lucide "scan-line" size=18 %} Procesar</span>
+      <span x-show="enviando" x-cloak class="inline-flex items-center gap-2"><span class="animate-spin">{% lucide "loader-circle" size=18 %}</span> Procesando…</span>
+    </button>
+    <p x-show="enviando" x-cloak class="mt-2 text-center text-xs text-text-secondary">La primera vez se cargan los modelos (unos segundos). Un video tarda más que una foto.</p>
+  </form>
+
+  <section class="flex min-w-0 flex-col gap-4">
+    {% if filas is not None %}
+      <div class="card card-pad">
+        <h2 class="text-xl font-semibold">Resultado</h2>
+        <p class="text-[13px] text-text-secondary">
+          {% if info.manual %}Placa escrita a mano · {{ camara.codigo }}{% else %}
+          {{ info.cuadros }} cuadro{{ info.cuadros|pluralize }} analizado{{ info.cuadros|pluralize }}{% if info.segundos %} de un video de {{ info.segundos }} s{% endif %} en {{ info.dispositivo }} · {{ camara.codigo }} · inicio {{ info.inicio|fecha_hora }}{% if info.exif %} (hora de la foto){% endif %}{% endif %}
+        </p>
+      </div>
+      {% for f in filas %}
+        {% include "panel/parciales/fila_subida.html" %}
+      {% empty %}
+        {% if not info.no_leidas %}
+        <div class="card">{% include "componentes/vacio.html" with icono="scan-line" titulo="No se encontró ninguna placa" texto="El detector no vio placas de al menos 25 px. Prueba con una imagen donde la placa se vea más grande o escribe la placa a mano." %}</div>
+        {% endif %}
+      {% endfor %}
+      {% if info.no_leidas %}
+      <div class="card card-pad" data-tour="no-leidas">
+        <h2 class="flex items-center gap-2 text-base font-semibold"><span class="text-warning">{% lucide "scan-search" size=18 %}</span>
+          {{ info.no_leidas|length }} placa{{ info.no_leidas|pluralize }} detectada{{ info.no_leidas|pluralize }} que el OCR no pudo leer</h2>
+        <p class="mt-1 text-[13px] text-text-secondary">El detector las encontró, pero la lectura no fue válida o confiable. Si la reconoces en el recorte, escríbela: entra al sistema como «placa escrita por una persona», con este recorte como evidencia.</p>
+        <div class="mt-4 flex flex-col gap-3">
+          {% for n in info.no_leidas %}{% include "panel/parciales/no_leida.html" %}{% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    {% else %}
+      <div class="card card-pad" data-tour="ejemplo">
+        <h2 class="text-xl font-semibold">Cómo probar una infracción</h2>
+        <ol class="mt-3 flex list-decimal flex-col gap-2 pl-5 text-text-secondary">
+          <li>Sube la foto o el video del auto en una cámara (por ejemplo <span class="font-mono">AV-01</span>) con su hora.</li>
+          <li>Sube otra del mismo auto en una cámara vecina (por ejemplo <span class="font-mono">AV-15</span>) con una hora posterior.</li>
+          <li>El sistema toma la distancia mínima entre ambas por la red de cámaras y calcula la velocidad conservadora; si supera el límite más la tolerancia, la infracción pasa a la cola.</li>
+        </ol>
+        <p class="mt-4 flex items-start gap-2 text-xs text-text-muted">{% lucide "info" size=14 %} Una foto es un solo cuadro: el OCR acierta menos que en un video, donde vota entre varias lecturas de la misma placa.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

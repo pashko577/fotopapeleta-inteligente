@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block titulo %}Captura en vivo · FotoPapeleta{% endblock %}
+{% block body_class %}min-h-dvh bg-black text-white{% endblock %}
+{% block cuerpo %}
+{# A8 · El celular actúa como cámara. Vista previa con la cámara del navegador (requiere HTTPS o localhost). #}
+<div x-data="{
+    estado: 'inicial', stream: null, camara: '{{ camaras.0.codigo|default:'' }}', trasera: true, inicio: null, segundos: 0,
+    async iniciar() {
+      if (!navigator.mediaDevices?.getUserMedia) { this.estado = 'sin-soporte'; return; }
+      this.estado = 'conectando';
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: this.trasera ? 'environment' : 'user', width: { ideal: 1280 } }, audio: false });
+        $refs.video.srcObject = this.stream;
+        this.estado = 'en-vivo'; this.inicio = Date.now();
+      } catch (e) { this.estado = e.name === 'NotAllowedError' ? 'sin-permiso' : 'error'; }
+    },
+    detener() { this.stream?.getTracks().forEach(t => t.stop()); this.stream = null; this.estado = 'inicial'; },
+    async girar() { this.trasera = !this.trasera; if (this.stream) { this.detener(); await this.iniciar(); } }
+  }" x-init="setInterval(() => { if (inicio && estado === 'en-vivo') segundos = Math.floor((Date.now() - inicio) / 1000) }, 1000)"
+  class="relative mx-auto flex min-h-dvh max-w-[480px] flex-col overflow-hidden">
+
+  <video x-ref="video" autoplay playsinline muted class="absolute inset-0 size-full object-cover" x-show="estado === 'en-vivo'"></video>
+  <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
+
+  {# Barra superior #}
+  <div class="relative z-10 flex flex-col gap-3 p-4">
+    <div class="flex items-center justify-between">
+      <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wider" :class="estado === 'en-vivo' ? 'bg-black/60' : 'bg-white/15'">
+        <span class="size-2 rounded-full" :class="estado === 'en-vivo' ? 'bg-[#FBBF24]' : 'bg-white/50'"></span><span x-text="estado === 'en-vivo' ? 'EN VIVO' : 'DETENIDO'"></span>
+      </span>
+      <a href="{% url 'panel:captura' %}" class="flex size-11 items-center justify-center rounded-full bg-black/50" aria-label="Salir">{% lucide "x" size=20 %}</a>
+    </div>
+    <label class="flex items-center gap-3 rounded-xl bg-black/60 px-4 py-2.5 backdrop-blur">
+      <span class="text-white/80">{% lucide "cctv" size=20 %}</span>
+      <span class="flex-1"><span class="block text-xs text-white/70">Esta cámara es</span>
+        <select x-model="camara" class="w-full appearance-none bg-transparent text-base font-semibold focus:outline-none" aria-label="Cámara">
+          {% for c in camaras %}<option value="{{ c.codigo }}" class="text-black">{{ c.codigo }} · {{ c.nombre }}</option>{% endfor %}
+        </select></span>
+      <span class="text-white/70">{% lucide "chevron-down" size=18 %}</span>
+    </label>
+  </div>
+
+  {# Estados #}
+  <div class="relative z-10 flex flex-1 items-center justify-center p-6 text-center">
+    <div x-show="estado === 'inicial'" class="max-w-xs">
+      <span class="mx-auto flex size-16 items-center justify-center rounded-full bg-white/10">{% lucide "camera" size=28 %}</span>
+      <p class="mt-4 text-lg font-semibold">Usa este celular como cámara</p>
+      <p class="mt-2 text-sm text-white/75">Elige la cámara del grafo que representa este punto y presiona el botón para empezar.</p>
+    </div>
+    <p x-show="estado === 'conectando'" x-cloak class="flex items-center gap-2 font-semibold"><span class="animate-spin">{% lucide "loader-circle" size=20 %}</span> Conectando con la cámara…</p>
+    <div x-show="estado === 'sin-permiso'" x-cloak class="max-w-xs">
+      <span class="mx-auto flex size-16 items-center justify-center rounded-full bg-[#FBBF24]/20 text-[#FBBF24]">{% lucide "lock" size=28 %}</span>
+      <p class="mt-4 text-lg font-semibold">Permite el acceso a la cámara para empezar a capturar.</p>
+      <button type="button" class="btn btn-primary btn-lg mt-5 w-full" @click="iniciar()">Volver a intentar</button>
+    </div>
+    <div x-show="estado === 'sin-soporte' || estado === 'error'" x-cloak class="max-w-xs">
+      <span class="mx-auto flex size-16 items-center justify-center rounded-full bg-[#F87171]/20 text-[#F87171]">{% lucide "video-off" size=28 %}</span>
+      <p class="mt-4 text-lg font-semibold">No se pudo abrir la cámara</p>
+      <p class="mt-2 text-sm text-white/75">El navegador solo permite la cámara en HTTPS o en localhost. Mientras tanto, usa la app IP Webcam y registra su URL en la cámara.</p>
+    </div>
+  </div>
+
+  {# Panel inferior #}
+  <div class="relative z-10 flex flex-col gap-4 p-4 pb-8">
+    <div class="flex items-start gap-3 rounded-xl bg-black/65 p-3 text-[13px] backdrop-blur">
+      <span class="mt-0.5 text-[#38BDF8]">{% lucide "info" size=18 %}</span>
+      <p class="text-white/85">Vista previa local. El envío de cuadros al worker desde esta página aún no está implementado (pendiente S1); hoy el worker lee el stream de IP Webcam.</p>
+    </div>
+    <div class="flex items-center justify-between px-4">
+      <button type="button" @click="girar()" class="flex flex-col items-center gap-1 text-xs"><span class="flex size-12 items-center justify-center rounded-full bg-white/15">{% lucide "switch-camera" size=22 %}</span>Girar</button>
+      <button type="button" @click="estado === 'en-vivo' ? detener() : iniciar()" class="flex size-20 items-center justify-center rounded-full border-4 border-white" :aria-label="estado === 'en-vivo' ? 'Detener' : 'Iniciar'">
+        <span class="bg-[#DC2626] transition-all" :class="estado === 'en-vivo' ? 'size-8 rounded-md' : 'size-14 rounded-full'"></span>
+      </button>
+      <div class="flex flex-col items-center gap-1 text-xs"><span class="flex size-12 items-center justify-center rounded-full bg-white/15 font-mono text-[13px]" x-text="`${String(Math.floor(segundos / 60)).padStart(2, '0')}:${String(segundos % 60).padStart(2, '0')}`">00:00</span>Tiempo</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+# Módulos B y C (grafo): el paquete grafo/ no tiene dependencias externas.
+# Pruebas y evaluación
+networkx==3.7
+pytest>=8.0
+
+# Módulo A (percepción): ver requirements-ml.txt
+
+# Web: ver requirements-web.txt

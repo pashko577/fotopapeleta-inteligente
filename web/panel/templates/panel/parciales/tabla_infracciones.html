@@ -1,0 +1,65 @@
+{% if chips %}
+<div class="mb-4 flex flex-wrap items-center gap-2">
+  {% for clave, texto in chips %}
+    {% if clave == "fechas" %}{% url_con desde=None hasta=None p=None as quitar %}{% elif clave == "q" %}{% url_con q=None p=None as quitar %}{% elif clave == "tipo" %}{% url_con tipo=None p=None as quitar %}{% elif clave == "estado" %}{% url_con estado=None p=None as quitar %}{% else %}{% url_con camara=None p=None as quitar %}{% endif %}
+    <a href="{{ quitar }}" class="chip chip-activo" hx-get="{% url 'panel:infracciones' %}{{ quitar }}" hx-target="#tabla" hx-push-url="true" aria-label="Quitar filtro {{ texto }}">{{ texto }} {% lucide "x" size=14 %}</a>
+  {% endfor %}
+  <a href="{% url 'panel:infracciones' %}" class="px-2 text-[13px] font-semibold text-primary-text hover:underline">Limpiar filtros</a>
+</div>
+{% endif %}
+
+{% if filas %}
+<div class="card max-md:hidden">
+  <div class="max-xl:overflow-x-auto">
+    <table class="tabla">
+      <thead><tr>
+        <th class="w-12"><input type="checkbox" aria-label="Seleccionar todas" class="size-[18px] accent-[var(--color-primary)]"
+              @change="document.querySelectorAll('[data-fila]').forEach(c => c.checked = $el.checked); sel = $el.checked ? [...document.querySelectorAll('[data-fila]')].map(c => c.value) : []"></th>
+        <th>ID</th><th>Placa</th><th>Tipo</th><th>Cámara</th><th>Fecha y hora</th><th>Confianza</th><th>Estado</th><th class="w-14"><span class="sr-only">Acciones</span></th>
+      </tr></thead>
+      <tbody>
+        {% for f in filas %}
+        <tr :class="sel.includes('{{ f.inf.pk }}') && '[&>td]:!bg-primary-subtle'">
+          <td><input type="checkbox" data-fila value="{{ f.inf.pk }}" aria-label="Seleccionar {{ f.inf.codigo }}" class="size-[18px] accent-[var(--color-primary)]"
+                     @change="$el.checked ? sel.push($el.value) : sel = sel.filter(x => x !== $el.value)"></td>
+          <td class="font-mono text-[13px] text-text-secondary"><a href="{% url 'panel:infraccion' f.inf.pk %}" class="hover:text-primary-text hover:underline">{{ f.inf.codigo }}</a></td>
+          <td>{% placa_sm f.inf.placa f.verificar %}</td>
+          <td>{% tag_tipo f.inf.tipo %}</td>
+          <td class="whitespace-nowrap"><span class="inline-flex items-center gap-1.5 font-mono text-[13px]"><span class="text-text-muted">{% lucide "map-pin" size=14 %}</span>{{ f.camara.codigo|default:"—" }}</span></td>
+          <td class="font-mono text-[13px] whitespace-nowrap">{{ f.ts|fecha_hora }}</td>
+          <td class="whitespace-nowrap">{% if f.confianza is not None %}<span class="inline-flex items-center gap-2"><span class="h-1 w-12 rounded-full bg-surface-muted"><span class="block h-1 rounded-full {% if f.confianza >= 0.8 %}bg-success{% elif f.confianza >= 0.5 %}bg-primary{% else %}bg-warning{% endif %}" style="width: {% widthratio f.confianza 1 100 %}%"></span></span><span class="font-mono text-[13px]">{{ f.confianza|pct }}</span></span>{% else %}—{% endif %}</td>
+          <td>{% badge_estado f.inf.estado %}</td>
+          <td>
+            <div x-data="{ m: false }" class="relative" @keydown.escape="m = false">
+              <button type="button" class="btn btn-ghost btn-icon btn-sm" @click="m = !m" aria-label="Más opciones" title="Más opciones">{% lucide "ellipsis-vertical" size=16 %}</button>
+              <div x-show="m" x-cloak @click.outside="m = false" class="card absolute right-0 z-20 mt-1 w-52 py-1 shadow-elev-2">
+                <a href="{% url 'panel:infraccion' f.inf.pk %}" class="flex h-9 items-center gap-2 px-3 hover:bg-surface-muted">{% lucide "eye" size=16 %} Ver detalle</a>
+                {% if f.inf.papeleta %}<a href="{% url 'portal:detalle' f.inf.papeleta.numero %}" class="flex h-9 items-center gap-2 px-3 hover:bg-surface-muted">{% lucide "file-text" size=16 %} Ver papeleta</a>{% endif %}
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "panel/parciales/paginacion.html" %}
+</div>
+
+{# Móvil: lista de cards #}
+<div class="flex flex-col gap-3 md:hidden">
+  {% for f in filas %}
+    <a href="{% url 'panel:infraccion' f.inf.pk %}" class="card flex flex-col gap-2 p-4">
+      <div class="flex items-center justify-between">{% placa_sm f.inf.placa f.verificar %}{% badge_estado f.inf.estado %}</div>
+      <p>{% tag_tipo f.inf.tipo %}</p>
+      <p class="font-mono text-xs text-text-muted">{{ f.inf.codigo }} · {{ f.camara.codigo }} · {{ f.ts|fecha_hora }}</p>
+    </a>
+  {% endfor %}
+  <div class="card">{% include "panel/parciales/paginacion.html" %}</div>
+</div>
+{% else %}
+<div class="card">
+  {% url 'panel:infracciones' as limpiar %}
+  {% include "componentes/vacio.html" with icono="list-filter" titulo="Ninguna infracción coincide con los filtros" texto="Prueba con otros filtros o límpialos para ver todas." accion_url=limpiar accion_texto="Limpiar filtros" accion_icono="x" %}
+</div>
+{% endif %}

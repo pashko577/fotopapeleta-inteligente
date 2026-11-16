@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block titulo %}Solicitar revisión · {{ p.numero }}{% endblock %}
+{% block body_class %}min-h-dvh bg-overlay{% endblock %}
+{% block cuerpo %}
+{# P4 · Modal en desktop, pantalla completa en móvil #}
+<div class="flex min-h-dvh items-start justify-center sm:items-center sm:p-6">
+  <form method="post" enctype="multipart/form-data" novalidate x-data="{ n: {{ form.descripcion.value|default:''|length }}, archivo: '' }"
+        class="flex min-h-dvh w-full flex-col bg-surface sm:min-h-0 sm:max-w-[560px] sm:rounded-2xl sm:shadow-elev-4" role="dialog" aria-labelledby="titulo-revision">
+    {% csrf_token %}
+    <div class="flex items-start gap-4 border-b border-border px-6 py-5">
+      <div class="flex-1">
+        <h1 id="titulo-revision" class="text-xl font-semibold">Solicitar revisión</h1>
+        <p class="mt-1 font-mono text-[13px] text-text-secondary">Papeleta {{ p.numero }} · placa {{ p.placa|placa }}</p>
+      </div>
+      <a href="{{ volver }}" class="btn btn-ghost btn-icon size-11 sm:size-10" aria-label="Cerrar">{% lucide "x" size=20 %}</a>
+    </div>
+
+    <div class="flex flex-1 flex-col gap-5 px-6 py-5">
+      {% if form.non_field_errors %}{% include "componentes/banner.html" with tipo="danger" texto=form.non_field_errors.0 %}{% endif %}
+      <div>
+        <label class="field-label" for="id_motivo">Motivo</label>
+        <select name="motivo" id="id_motivo" class="input">
+          {% for v, t in form.fields.motivo.choices %}<option value="{{ v }}" {% if form.motivo.value == v %}selected{% endif %}>{{ t }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="field-label" for="id_descripcion">Describe lo ocurrido</label>
+        <div class="relative">
+          <textarea name="descripcion" id="id_descripcion" rows="4" maxlength="500" @input="n = $el.value.length"
+                    class="input resize-none pb-7 {% if form.descripcion.errors %}input-error{% endif %}" placeholder="Por ejemplo: mi vehículo tiene placa ABC-128; en la foto se ve que el último dígito es un 8.">{{ form.descripcion.value|default:'' }}</textarea>
+          <span class="absolute right-3 bottom-2 font-mono text-[11px] text-text-muted"><span x-text="n"></span> / 500</span>
+        </div>
+        {% for e in form.descripcion.errors %}<p class="mt-1.5 flex items-center gap-1.5 text-[13px] text-danger">{% lucide "circle-x" size=14 %} {{ e }}</p>{% endfor %}
+      </div>
+      <label class="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border-strong bg-surface-muted px-4 py-6 text-center hover:border-primary">
+        <span class="flex size-10 items-center justify-center rounded-full bg-surface text-primary-text shadow-elev-1">{% lucide "upload" size=18 %}</span>
+        <span x-show="!archivo">Arrastra una foto o PDF, o <span class="font-semibold text-primary-text">selecciónalo</span></span>
+        <span x-show="archivo" x-cloak class="font-semibold" x-text="archivo"></span>
+        <span class="text-xs text-text-secondary">Tarjeta de propiedad, foto de la placa · máx. 10 MB</span>
+        <input type="file" name="adjunto" accept=".jpg,.jpeg,.png,.pdf" class="sr-only" @change="archivo = $el.files[0]?.name || ''">
+      </label>
+      {% for e in form.adjunto.errors %}<p class="-mt-3 flex items-center gap-1.5 text-[13px] text-danger">{% lucide "circle-x" size=14 %} {{ e }}</p>{% endfor %}
+      <div>
+        <label class="field-label" for="id_correo">Correo para la respuesta</label>
+        <div class="relative">
+          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-muted">{% lucide "mail" size=16 %}</span>
+          <input type="email" name="correo" id="id_correo" value="{{ form.correo.value|default:'' }}" autocomplete="email" class="input pl-9 {% if form.correo.errors %}input-error{% endif %}" placeholder="nombre@correo.com">
+        </div>
+        {% for e in form.correo.errors %}<p class="mt-1.5 flex items-center gap-1.5 text-[13px] text-danger">{% lucide "circle-x" size=14 %} {{ e }}</p>{% endfor %}
+      </div>
+      <label class="flex items-start gap-3 text-[13px] text-text-secondary">
+        <input type="checkbox" name="declaracion" class="mt-0.5 size-[18px] flex-none accent-[var(--color-primary)]" {% if form.declaracion.value %}checked{% endif %}>
+        <span>Declaro que la información es verdadera y acepto que se use solo para atender esta solicitud.</span>
+      </label>
+      {% for e in form.declaracion.errors %}<p class="-mt-3 flex items-center gap-1.5 text-[13px] text-danger">{% lucide "circle-x" size=14 %} {{ e }}</p>{% endfor %}
+    </div>
+
+    <div class="flex justify-end gap-3 border-t border-border bg-surface-muted px-6 py-4 sm:rounded-b-2xl">
+      <a href="{{ volver }}" class="btn btn-secondary max-sm:h-12 max-sm:flex-1">Cancelar</a>
+      <button class="btn btn-primary max-sm:h-12 max-sm:flex-1">{% lucide "send" size=16 %} Enviar solicitud</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

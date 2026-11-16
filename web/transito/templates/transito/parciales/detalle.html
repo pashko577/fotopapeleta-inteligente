@@ -1,0 +1,36 @@
+<section class="card overflow-hidden">
+  <div class="flex items-start justify-between gap-3 p-5 pb-3">
+    <div>
+      <h2 class="text-xl font-semibold">{{ cam.nombre }}</h2>
+      <p class="text-[13px] text-text-secondary">{{ cam.distrito }} · {{ cam.ubicacion }}</p>
+    </div>
+    <span id="nivel-camara">{% include "transito/parciales/nivel.html" with nivel=cam.estado.nivel %}</span>
+  </div>
+  {# Detección en vivo (MJPEG que genera el servidor con YOLOv8) y video original (HLS) #}
+  <div x-data="{ ver: 'deteccion' }" class="px-5">
+    <div class="segmented mb-2 grid w-full grid-cols-2">
+      <button type="button" :aria-pressed="ver === 'deteccion'" @click="ver = 'deteccion'">{% lucide "scan-line" size=16 %} Detección en vivo</button>
+      <button type="button" :aria-pressed="ver === 'vivo'" @click="ver = 'vivo'">{% lucide "video" size=16 %} Video original</button>
+    </div>
+    <div class="relative aspect-video overflow-hidden rounded-lg bg-black">
+      <div x-show="ver === 'deteccion'" class="relative size-full">
+        <div class="absolute inset-0 flex items-center justify-center gap-2 text-[13px] text-white/70">
+          <span class="animate-spin">{% lucide "loader-circle" size=16 %}</span> Conectando con la cámara y cargando el detector…
+        </div>
+        <img :src="ver === 'deteccion' ? '{% url 'transito:video' cam.codigo %}' : null" alt="Vehículos detectados en vivo en {{ cam.nombre }}"
+             class="relative size-full object-contain">
+      </div>
+      <video x-show="ver === 'vivo'" x-cloak muted autoplay playsinline controls class="size-full object-contain"
+             x-effect="const v = $el, url = '{{ cam.url }}';
+                       if (ver !== 'vivo' || v.dataset.listo) return; v.dataset.listo = 1;
+                       if (window.Hls && Hls.isSupported()) { const h = new Hls(); h.loadSource(url); h.attachMedia(v); }
+                       else if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = url; }"></video>
+    </div>
+  </div>
+  <div class="p-5">
+    {% if error %}<div class="mb-3">{% include "componentes/banner.html" with tipo="danger" texto=error %}</div>{% endif %}
+    <div hx-get="{% url 'transito:en_vivo' cam.codigo %}" hx-trigger="load, every 5s" hx-swap="innerHTML">
+      {% include "transito/parciales/en_vivo.html" with vivo=None nivel=cam.estado.nivel %}
+    </div>
+  </div>
+</section>

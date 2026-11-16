@@ -1,0 +1,15 @@
+{# Pagination: «Mostrando 1–20 de 248» + anterior/siguiente #}
+<div class="flex items-center justify-between gap-3 border-t border-border px-4 py-3 text-[13px] text-text-secondary">
+  <span>Mostrando {{ pagina.start_index }}–{{ pagina.end_index }} de {{ pagina.paginator.count }}</span>
+  {% if pagina.has_other_pages %}
+  <div class="flex items-center gap-1">
+    {% if pagina.has_previous %}{% url_con p=pagina.previous_page_number as ant %}<a href="{{ ant }}" class="btn btn-ghost btn-icon btn-sm" aria-label="Página anterior">{% lucide "chevron-left" size=16 %}</a>{% endif %}
+    {% for n in pagina.paginator.page_range %}
+      {% if n == pagina.number %}<span class="flex size-8 items-center justify-center rounded-md bg-primary font-semibold text-white" aria-current="page">{{ n }}</span>
+      {% elif n == 1 or n == pagina.paginator.num_pages or n|add:"-1" == pagina.number or n|add:"1" == pagina.number %}{% url_con p=n as ir %}<a href="{{ ir }}" class="flex size-8 items-center justify-center rounded-md hover:bg-surface-muted">{{ n }}</a>
+      {% elif n|add:"-2" == pagina.number or n|add:"2" == pagina.number %}<span class="px-1">…</span>{% endif %}
+    {% endfor %}
+    {% if pagina.has_next %}{% url_con p=pagina.next_page_number as sig %}<a href="{{ sig }}" class="btn btn-ghost btn-icon btn-sm" aria-label="Página siguiente">{% lucide "chevron-right" size=16 %}</a>{% endif %}
+  </div>
+  {% endif %}
+</div>

@@ -1,0 +1,17 @@
+{% if error %}
+  {% include "componentes/banner.html" with tipo="danger" texto=error %}
+{% elif imposible %}
+  {% include "componentes/banner.html" with tipo="warning" titulo="Alerta: captura físicamente imposible" texto="Recorrer la ruta mínima en ese tiempo exigiría más de la velocidad máxima plausible. El sistema no genera infracción: crea una alerta de posible placa clonada o error de lectura." %}
+  <p class="mt-2 font-mono text-[13px] text-text-secondary">{{ v.ruta|join:" → " }} · {{ v.km|num }} km en {{ segundos|duracion }} → {{ kmh_min|num:0 }} km/h &gt; {{ cfg.VELOCIDAD_MAX_PLAUSIBLE_KMH|num:0 }} km/h</p>
+{% else %}
+<div class="grid gap-4 rounded-lg bg-surface-muted p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+  <dl class="grid grid-cols-2 gap-x-6 gap-y-2 text-[13px] md:grid-cols-5">
+    <div><dt class="text-xs text-text-secondary">Ruta mínima</dt><dd class="font-mono">{{ v.ruta|join:" → " }}</dd></div>
+    <div><dt class="text-xs text-text-secondary">Distancia · tiempo</dt><dd class="font-mono">{{ v.km|num }} km · {{ segundos|duracion }}</dd></div>
+    <div><dt class="text-xs text-text-secondary">Medida</dt><dd class="font-mono">{{ v.v_medida|num }} km/h</dd></div>
+    <div><dt class="text-xs text-text-secondary">Conservadora</dt><dd class="font-mono font-semibold">{{ v.v_conservadora|num }} km/h</dd></div>
+    <div><dt class="text-xs text-text-secondary">Límite + tolerancia</dt><dd class="font-mono">{{ v.limite|num:0 }} + {{ cfg.TOLERANCIA_KMH|num:0 }} km/h</dd></div>
+  </dl>
+  {% if v.infraccion %}{% badge_estado "rechazada" "Infracción" %}{% else %}{% badge_estado "aprobada" "Sin infracción" %}{% endif %}
+</div>
+{% endif %}

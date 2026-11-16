@@ -1,0 +1,82 @@
+{
+ "cuadros_procesados": 48,
+ "ms_por_cuadro_promedio": 31.4,
+ "eventos": 6,
+ "placas_esperadas_leidas": [
+  "D9R-052",
+  "T3P-298"
+ ],
+ "placas_esperadas_no_leidas": [
+  "V8D-001"
+ ],
+ "lecturas_distintas_de_la_esperada": [
+  "DOR-052",
+  "VBD-001"
+ ],
+ "pistas_descartadas_sin_lectura": 6,
+ "infracciones": [
+  {
+   "placa": "VBD-001",
+   "coincidencia": "confirmada",
+   "captura_anterior": "EV-20261015-000001",
+   "captura_actual": "EV-20261015-000002",
+   "ruta": [
+    "AV-01",
+    "AV-08"
+   ],
+   "km": 3.0,
+   "segundos": 120.0,
+   "v_medida": 90.0,
+   "v_conservadora": 87.1,
+   "limite": 60,
+   "exceso": 27.1,
+   "eventos": [
+    "EV-20261015-000001",
+    "EV-20261015-000002"
+   ]
+  }
+ ],
+ "sin_infraccion": [
+  {
+   "placa": "DOR-052",
+   "coincidencia": "a_verificar",
+   "captura_anterior": "EV-20261015-000003",
+   "captura_actual": "EV-20261015-000004",
+   "ruta": [
+    "AV-01",
+    "AV-08"
+   ],
+   "km": 3.0,
+   "segundos": 200.0,
+   "v_medida": 54.0,
+   "v_conservadora": 52.9,
+   "limite": 60,
+   "exceso": -7.1,
+   "eventos": [
+    "EV-20261015-000003",
+    "EV-20261015-000004"
+   ]
+  }
+ ],
+ "alertas": [
+  {
+   "tipo": "captura_imposible",
+   "placa": "T3P-298",
+   "coincidencia": "confirmada",
+   "captura_anterior": "EV-20261015-000005",
+   "captura_actual": "EV-20261015-000006",
+   "de": "AV-01",
+   "a": "AV-12",
+   "km_minimos": 6.8,
+   "minutos_observados": 1.0,
+   "velocidad_necesaria_kmh": 408.0,
+   "velocidad_maxima_plausible_kmh": 200,
+   "minimo_plausible_min": 2.04,
+   "motivo": "Captura físicamente imposible: posible placa clonada o error de lectura",
+   "eventos": [
+    "EV-20261015-000005",
+    "EV-20261015-000006"
+   ]
+  }
+ ]
+}

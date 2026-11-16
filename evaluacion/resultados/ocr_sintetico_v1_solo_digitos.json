@@ -1,0 +1,276 @@
+{
+  "placas_por_nivel": 200,
+  "cuadros_por_placa": 9,
+  "semilla": 7,
+  "lecturas_ocr": 10800,
+  "segundos": 208.3,
+  "gpu": "NVIDIA GeForce RTX 5070",
+  "resultados": {
+    "facil": {
+      "crudo": {
+        "1": {
+          "cer": 0.0472,
+          "exactitud": 0.7244,
+          "sin_lectura": 0.0
+        },
+        "3": {
+          "cer": 0.0467,
+          "exactitud": 0.725,
+          "sin_lectura": 0.0
+        },
+        "5": {
+          "cer": 0.0442,
+          "exactitud": 0.74,
+          "sin_lectura": 0.0
+        },
+        "9": {
+          "cer": 0.0442,
+          "exactitud": 0.74,
+          "sin_lectura": 0.0
+        }
+      },
+      "preproceso": {
+        "1": {
+          "cer": 0.0469,
+          "exactitud": 0.7283,
+          "sin_lectura": 0.0
+        },
+        "3": {
+          "cer": 0.0458,
+          "exactitud": 0.735,
+          "sin_lectura": 0.0
+        },
+        "5": {
+          "cer": 0.0442,
+          "exactitud": 0.745,
+          "sin_lectura": 0.0
+        },
+        "9": {
+          "cer": 0.0442,
+          "exactitud": 0.745,
+          "sin_lectura": 0.0
+        }
+      },
+      "formato": {
+        "1": {
+          "cer": 0.048,
+          "exactitud": 0.7311,
+          "sin_lectura": 0.0022
+        },
+        "3": {
+          "cer": 0.045,
+          "exactitud": 0.74,
+          "sin_lectura": 0.0
+        },
+        "5": {
+          "cer": 0.0442,
+          "exactitud": 0.745,
+          "sin_lectura": 0.0
+        },
+        "9": {
+          "cer": 0.0442,
+          "exactitud": 0.745,
+          "sin_lectura": 0.0
+        }
+      }
+    },
+    "media": {
+      "crudo": {
+        "1": {
+          "cer": 0.2403,
+          "exactitud": 0.3661,
+          "sin_lectura": 0.0178
+        },
+        "3": {
+          "cer": 0.1242,
+          "exactitud": 0.595,
+          "sin_lectura": 0.055
+        },
+        "5": {
+          "cer": 0.0692,
+          "exactitud": 0.675,
+          "sin_lectura": 0.005
+        },
+        "9": {
+          "cer": 0.065,
+          "exactitud": 0.675,
+          "sin_lectura": 0.005
+        }
+      },
+      "preproceso": {
+        "1": {
+          "cer": 0.2247,
+          "exactitud": 0.3989,
+          "sin_lectura": 0.0172
+        },
+        "3": {
+          "cer": 0.1108,
+          "exactitud": 0.63,
+          "sin_lectura": 0.045
+        },
+        "5": {
+          "cer": 0.08,
+          "exactitud": 0.64,
+          "sin_lectura": 0.01
+        },
+        "9": {
+          "cer": 0.0692,
+          "exactitud": 0.655,
+          "sin_lectura": 0.005
+        }
+      },
+      "formato": {
+        "1": {
+          "cer": 0.2939,
+          "exactitud": 0.4028,
+          "sin_lectura": 0.1894
+        },
+        "3": {
+          "cer": 0.0933,
+          "exactitud": 0.625,
+          "sin_lectura": 0.005
+        },
+        "5": {
+          "cer": 0.0842,
+          "exactitud": 0.63,
+          "sin_lectura": 0.005
+        },
+        "9": {
+          "cer": 0.0667,
+          "exactitud": 0.655,
+          "sin_lectura": 0.005
+        }
+      }
+    },
+    "dificil": {
+      "crudo": {
+        "1": {
+          "cer": 0.8324,
+          "exactitud": 0.0161,
+          "sin_lectura": 0.5717
+        },
+        "3": {
+          "cer": 0.7542,
+          "exactitud": 0.075,
+          "sin_lectura": 0.645
+        },
+        "5": {
+          "cer": 0.6742,
+          "exactitud": 0.075,
+          "sin_lectura": 0.53
+        },
+        "9": {
+          "cer": 0.5375,
+          "exactitud": 0.125,
+          "sin_lectura": 0.35
+        }
+      },
+      "preproceso": {
+        "1": {
+          "cer": 0.7924,
+          "exactitud": 0.025,
+          "sin_lectura": 0.4322
+        },
+        "3": {
+          "cer": 0.7125,
+          "exactitud": 0.085,
+          "sin_lectura": 0.605
+        },
+        "5": {
+          "cer": 0.5883,
+          "exactitud": 0.125,
+          "sin_lectura": 0.44
+        },
+        "9": {
+          "cer": 0.4625,
+          "exactitud": 0.17,
+          "sin_lectura": 0.255
+        }
+      },
+      "formato": {
+        "1": {
+          "cer": 0.8891,
+          "exactitud": 0.0267,
+          "sin_lectura": 0.8367
+        },
+        "3": {
+          "cer": 0.6833,
+          "exactitud": 0.095,
+          "sin_lectura": 0.565
+        },
+        "5": {
+          "cer": 0.5625,
+          "exactitud": 0.135,
+          "sin_lectura": 0.41
+        },
+        "9": {
+          "cer": 0.4392,
+          "exactitud": 0.18,
+          "sin_lectura": 0.235
+        }
+      }
+    }
+  },
+  "confusiones_frecuentes": [
+    [
+      "0→O",
+      254
+    ],
+    [
+      "5→S",
+      242
+    ],
+    [
+      "1→I",
+      97
+    ],
+    [
+      "Z→2",
+      78
+    ],
+    [
+      "G→6",
+      72
+    ],
+    [
+      "7→Z",
+      59
+    ],
+    [
+      "S→5",
+      45
+    ],
+    [
+      "4→1",
+      35
+    ],
+    [
+      "2→Z",
+      33
+    ],
+    [
+      "B→8",
+      29
+    ],
+    [
+      "1→4",
+      29
+    ],
+    [
+      "A→4",
+      25
+    ],
+    [
+      "8→B",
+      24
+    ],
+    [
+      "6→G",
+      24
+    ],
+    [
+      "D→0",
+      23
+    ]
+  ]
+}

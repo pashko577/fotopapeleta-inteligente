@@ -1,0 +1,305 @@
+/* FotoPapeleta Inteligente — Tailwind v4.
+   Los nombres de las variables son los mismos de prototipo/diseno_prototipo_pencil.md (sin el $). */
+@import "tailwindcss";
+
+@source "../templates";
+@source "../*/templates";
+@source "../*/templatetags";
+/* Clases armadas en las plantillas con el código del tipo (bg-cat-{{ tipo }}) */
+@source inline("bg-cat-{velocidad,semaforo,peatonal,celular,giro,contrario,senales}");
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin-wght.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/jetbrains-mono-latin-wght.woff2") format("woff2");
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* 3.1 Superficies y texto */
+  --color-bg: #F6F7F9;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F1F3F6;
+  --color-surface-sunken: #E9EDF2;
+  --color-border: #E2E6EC;
+  --color-border-strong: #CBD2DB;
+  --color-text: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748B;
+  --color-text-inverse: #FFFFFF;
+  --color-overlay: #0F172A99;
+
+  /* 3.2 Marca y acción */
+  --color-primary: #1D4ED8;
+  --color-primary-hover: #1E40AF;
+  --color-primary-subtle: #EFF4FF;
+  --color-primary-text: #1E40AF;
+  --color-on-primary: #FFFFFF;
+  --color-accent: #F59E0B;
+  --color-focus-ring: #93B4FF;
+
+  /* 3.3 Estados semánticos */
+  --color-success: #15803D;
+  --color-success-subtle: #ECFDF3;
+  --color-warning: #B45309;
+  --color-warning-subtle: #FFFBEB;
+  --color-danger: #B91C1C;
+  --color-danger-solid: #DC2626;
+  --color-danger-subtle: #FEF2F2;
+  --color-info: #0369A1;
+  --color-info-subtle: #F0F9FF;
+  --color-neutral-subtle: #F1F5F9;
+
+  /* 3.5 Tipos de infracción */
+  --color-cat-velocidad: #2563EB;
+  --color-cat-semaforo: #DC2626;
+  --color-cat-peatonal: #D97706;
+  --color-cat-celular: #7C3AED;
+  --color-cat-giro: #0891B2;
+  --color-cat-contrario: #DB2777;
+  --color-cat-senales: #4D7C0F;
+
+  /* 3.6 Mapa y grafo */
+  --color-graph-node: #FFFFFF;
+  --color-graph-node-border: #475569;
+  --color-graph-edge: #CBD2DB;
+  --color-graph-visited: #93C5FD;
+  --color-graph-route: #F59E0B;
+  --color-graph-origin: #1D4ED8;
+  --color-graph-target: #15803D;
+  --color-camera-online: #16A34A;
+  --color-camera-offline: #DC2626;
+
+  /* 5.2 Radios y elevación */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --shadow-elev-1: 0 1px 2px #0F172A14;
+  --shadow-elev-2: 0 4px 12px #0F172A1F;
+  --shadow-elev-3: 0 8px 24px #0F172A29;
+  --shadow-elev-4: 0 16px 48px #0F172A3D;
+
+  /* 5.7 Movimiento */
+  --ease-fp: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* 5.3 Tamaños que dependen de la densidad */
+:root {
+  --control-h-sm: 32px;
+  --control-h-md: 40px;
+  --control-h-lg: 48px;
+  --table-row-h: 52px;
+  --table-head-h: 44px;
+  --card-padding: 20px;
+}
+[data-density="compact"] {
+  --control-h-sm: 28px;
+  --control-h-md: 36px;
+  --control-h-lg: 44px;
+  --table-row-h: 40px;
+  --table-head-h: 36px;
+  --card-padding: 16px;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0B1120;
+  --color-surface: #111827;
+  --color-surface-muted: #1A2333;
+  --color-surface-sunken: #0E1626;
+  --color-border: #263042;
+  --color-border-strong: #364152;
+  --color-text: #F1F5F9;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted: #94A3B8;
+  --color-text-inverse: #0F172A;
+  --color-overlay: #00000099;
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-primary-subtle: #172554;
+  --color-primary-text: #93C5FD;
+  --color-accent: #FBBF24;
+  --color-focus-ring: #3B82F6;
+  --color-success: #4ADE80;
+  --color-success-subtle: #052E16;
+  --color-warning: #FBBF24;
+  --color-warning-subtle: #2A1F05;
+  --color-danger: #F87171;
+  --color-danger-subtle: #3B0A0A;
+  --color-info: #38BDF8;
+  --color-info-subtle: #082F49;
+  --color-neutral-subtle: #1E293B;
+  --color-graph-node: #1A2333;
+  --color-graph-node-border: #94A3B8;
+  --color-graph-edge: #364152;
+  --color-graph-visited: #1E3A8A;
+  --color-graph-route: #FBBF24;
+  --color-graph-origin: #3B82F6;
+  --color-graph-target: #4ADE80;
+  --color-camera-online: #4ADE80;
+  --color-camera-offline: #F87171;
+  color-scheme: dark;
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+  [x-cloak] { display: none !important; }
+}
+
+@layer components {
+  /* 8.1 Botones: alto según densidad, radius-md, gap space-2 */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: var(--control-h-md); padding: 0 16px; border-radius: var(--radius-md);
+    font-weight: 600; font-size: 14px; white-space: nowrap;
+    transition: background-color 120ms var(--ease-fp), border-color 120ms var(--ease-fp);
+    cursor: pointer;
+  }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-sm { height: var(--control-h-sm); padding: 0 12px; font-size: 13px; }
+  .btn-lg { height: var(--control-h-lg); padding: 0 20px; }
+  .btn-primary { background: var(--color-primary); color: var(--color-on-primary); }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-secondary { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border-strong); }
+  .btn-secondary:hover { background: var(--color-surface-muted); }
+  .btn-ghost { color: var(--color-text-secondary); }
+  .btn-ghost:hover { background: var(--color-surface-muted); color: var(--color-text); }
+  .btn-danger { background: var(--color-danger-solid); color: #FFFFFF; }
+  .btn-danger:hover { background: #B91C1C; }
+  .btn-success { background: #15803D; color: #FFFFFF; }
+  .btn-success:hover { background: #166534; }
+  .btn-icon { width: var(--control-h-md); padding: 0; }
+
+  .kbd {
+    font-family: var(--font-mono); font-size: 12px; line-height: 1; padding: 3px 6px;
+    border-radius: var(--radius-sm); background: rgb(255 255 255 / .2);
+  }
+  .btn-secondary .kbd { background: var(--color-surface-muted); color: var(--color-text-secondary); }
+
+  /* 8.2 Formularios */
+  .field-label { display: block; font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 6px; }
+  .input {
+    width: 100%; height: var(--control-h-md); padding: 0 12px; border-radius: var(--radius-md);
+    background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border-strong);
+  }
+  .input::placeholder { color: var(--color-text-muted); }
+  .input:focus { outline: 2px solid var(--color-focus-ring); outline-offset: 0; border-color: var(--color-primary); }
+  textarea.input { height: auto; padding: 10px 12px; }
+  select.input { appearance: none; padding-right: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+  .input-error { border-color: var(--color-danger); }
+
+  /* 8.4 Card */
+  .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+  .card-pad { padding: var(--card-padding); }
+
+  /* Tabla */
+  .tabla { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .tabla thead th {
+    height: var(--table-head-h); padding: 0 16px; text-align: left; background: var(--color-surface-muted);
+    font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border); white-space: nowrap;
+  }
+  .tabla thead th:first-child { border-top-left-radius: calc(var(--radius-lg) - 1px); }
+  .tabla thead th:last-child { border-top-right-radius: calc(var(--radius-lg) - 1px); }
+  .tabla tbody td { height: var(--table-row-h); padding: 0 16px; border-bottom: 1px solid var(--color-border); }
+  .tabla tbody tr:last-child td { border-bottom: 0; }
+  .tabla tbody tr:hover td { background: var(--color-surface-muted); }
+  [data-density="compact"] .tabla td, [data-density="compact"] .tabla th { padding: 0 12px; }
+
+  .rotulo { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+
+  /* Placa peruana (componente de marca): igual en ambos temas */
+  .placa {
+    display: inline-flex; flex-direction: column; background: #FFFFFF; color: #0F172A;
+    border: 2px solid #0F172A; border-radius: 8px; overflow: hidden; text-align: center;
+  }
+  .placa-franja { background: #1D4ED8; color: #FFFFFF; font-size: 10px; font-weight: 700; letter-spacing: .08em; line-height: 16px; }
+  .placa-num { font-family: var(--font-mono); font-weight: 700; letter-spacing: .08em; }
+  .placa-lg { width: 200px; }
+  .placa-lg .placa-num { font-size: 28px; line-height: 50px; }
+  .placa-md { width: 140px; }
+  .placa-md .placa-num { font-size: 20px; line-height: 30px; }
+  .placa-sm {
+    display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-weight: 600; font-size: 13px;
+    padding: 2px 8px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm);
+    background: var(--color-surface); color: var(--color-text); white-space: nowrap;
+  }
+  .placa-sm.verificar { border: 1px dashed var(--color-warning); color: var(--color-warning); background: var(--color-warning-subtle); }
+
+  /* Switch 40 × 24 */
+  .switch { position: relative; width: 40px; height: 24px; border-radius: 999px; background: var(--color-border-strong); transition: background-color 120ms var(--ease-fp); flex: none; }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 999px; background: #FFFFFF; box-shadow: var(--shadow-elev-1); transition: transform 120ms var(--ease-fp); }
+  .switch[aria-checked="true"] { background: var(--color-primary); }
+  .switch[aria-checked="true"]::after { transform: translateX(16px); }
+  .switch:disabled { opacity: .55; }
+
+  /* SegmentedControl */
+  .segmented { display: inline-flex; gap: 2px; padding: 3px; border-radius: var(--radius-md); background: var(--color-surface-muted); }
+  .segmented > * { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: calc(var(--control-h-md) - 6px); padding: 0 12px; border-radius: 6px; color: var(--color-text-secondary); font-weight: 500; }
+  .segmented > [aria-pressed="true"], .segmented > :has(input:checked) { background: var(--color-surface); color: var(--color-text); font-weight: 600; box-shadow: var(--shadow-elev-1); }
+
+  /* Chips */
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 13px; font-weight: 500; background: var(--color-surface); }
+  .chip-activo { background: var(--color-primary-subtle); color: var(--color-primary-text); border-color: transparent; }
+
+  /* Skeleton (12. Estados) */
+  .skeleton { background: var(--color-surface-muted); border-radius: var(--radius-md); animation: pulso 1.4s ease-in-out infinite; }
+}
+
+@keyframes pulso { 50% { opacity: .55; } }
+
+/* Recorrido guiado (driver.js) con los tokens del diseño; más específico que vendor/driver.css */
+.driver-popover.fp-tour {
+  background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-elev-3); padding: 18px 20px; max-width: 360px;
+  font-family: var(--font-sans);
+}
+.driver-popover.fp-tour .driver-popover-title { font: 600 16px/1.4 var(--font-sans); color: var(--color-text); }
+.driver-popover.fp-tour .driver-popover-description { font: 400 14px/1.5 var(--font-sans); color: var(--color-text-secondary); margin-top: 6px; }
+.driver-popover.fp-tour .driver-popover-progress-text { font: 500 12px var(--font-mono); color: var(--color-text-muted); }
+.driver-popover.fp-tour .driver-popover-footer { margin-top: 16px; gap: 8px; }
+.driver-popover.fp-tour .driver-popover-footer button {
+  font: 600 13px var(--font-sans); text-shadow: none; border-radius: var(--radius-md); padding: 7px 12px;
+  background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border-strong);
+}
+.driver-popover.fp-tour .driver-popover-footer .driver-popover-next-btn { background: var(--color-primary); color: var(--color-on-primary); border-color: var(--color-primary); }
+.driver-popover.fp-tour .driver-popover-close-btn { color: var(--color-text-muted); }
+.driver-popover.fp-tour .driver-popover-arrow-side-left { border-left-color: var(--color-surface); }
+.driver-popover.fp-tour .driver-popover-arrow-side-right { border-right-color: var(--color-surface); }
+.driver-popover.fp-tour .driver-popover-arrow-side-top { border-top-color: var(--color-surface); }
+.driver-popover.fp-tour .driver-popover-arrow-side-bottom { border-bottom-color: var(--color-surface); }
+
+/* htmx: indicador de carga */
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: inline-flex; }
+.htmx-request .ocultar-al-cargar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+}
+
+/* Mapa de OpenStreetMap en tema oscuro: se invierten los colores de las imágenes del mapa (no de los marcadores) */
+[data-theme="dark"] .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9); }
+[data-theme="dark"] .leaflet-container { background: var(--color-surface-sunken); }

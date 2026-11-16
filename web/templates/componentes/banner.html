@@ -1,0 +1,11 @@
+{# 8.5 Alerta en página: borde izquierdo de 4 px del color del estado #}
+<div class="flex items-start gap-3 rounded-lg border-l-4 px-4 py-3
+  {% if tipo == 'danger' %}border-danger bg-danger-subtle{% elif tipo == 'warning' %}border-warning bg-warning-subtle{% elif tipo == 'success' %}border-success bg-success-subtle{% else %}border-info bg-info-subtle{% endif %}" role="{% if tipo == 'danger' %}alert{% else %}status{% endif %}">
+  <span class="mt-0.5 flex-none {% if tipo == 'danger' %}text-danger{% elif tipo == 'warning' %}text-warning{% elif tipo == 'success' %}text-success{% else %}text-info{% endif %}">
+    {% if tipo == 'danger' %}{% lucide "circle-x" size=18 %}{% elif tipo == 'warning' %}{% lucide "triangle-alert" size=18 %}{% elif tipo == 'success' %}{% lucide "circle-check" size=18 %}{% else %}{% lucide icono|default:"info" size=18 %}{% endif %}
+  </span>
+  <div class="min-w-0 flex-1">
+    {% if titulo %}<p class="font-semibold">{{ titulo }}</p>{% endif %}
+    <p class="{% if titulo %}text-text-secondary{% endif %}">{{ texto }}</p>
+  </div>
+</div>

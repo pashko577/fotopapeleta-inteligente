@@ -1,0 +1,21 @@
+{% extends "portal/base_portal.html" %}
+{% block pagina %}Mis consultas{% endblock %}
+{% block contenido %}
+<div class="mx-auto max-w-[640px] px-4 py-6 md:py-10" x-data>
+  <h1 class="text-[22px] font-semibold md:text-[28px]">Mis consultas</h1>
+  <p class="mt-1 text-text-secondary">Placas que consultaste en este dispositivo. No se guardan en el servidor.</p>
+  <div class="card mt-6 overflow-hidden">
+    <template x-for="p in $store.historial.placas" :key="p">
+      <a :href="'{% url 'portal:resultados' %}?placa=' + encodeURIComponent(p)" class="flex min-h-14 items-center gap-3 border-b border-border px-4 last:border-0 hover:bg-surface-muted">
+        <span class="placa-sm" x-text="p"></span>
+        <span class="flex-1 text-text-secondary">Ver papeletas</span>
+        <span class="text-text-muted">{% lucide "chevron-right" size=18 %}</span>
+      </a>
+    </template>
+    <div x-show="!$store.historial.placas.length">
+      {% include "componentes/vacio.html" with icono="history" titulo="Aún no consultaste ninguna placa" texto="Cuando consultes una placa aparecerá aquí para repetir la consulta con un toque." accion_url="/" accion_texto="Consultar una placa" accion_icono="search" %}
+    </div>
+  </div>
+  <button type="button" x-show="$store.historial.placas.length" @click="$store.historial.limpiar()" class="btn btn-ghost mt-4 h-11">{% lucide "trash-2" size=16 %} Borrar historial</button>
+</div>
+{% endblock %}

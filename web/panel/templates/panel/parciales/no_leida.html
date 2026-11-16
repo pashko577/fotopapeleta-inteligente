@@ -1,0 +1,18 @@
+{# Placa detectada que el OCR no leyó: recorte + campo para escribirla (HTMX reemplaza la tarjeta por el resultado) #}
+<form id="no-leida-{{ n.token }}" class="flex flex-wrap items-center gap-3 rounded-lg border border-border p-3"
+      hx-post="{% url 'panel:escribir_no_leida' n.token %}" hx-target="this" hx-swap="outerHTML">
+  <a href="{{ n.url_cuadro }}" target="_blank" class="flex h-16 w-40 flex-none items-center justify-center overflow-hidden rounded-md bg-surface-sunken" title="Ver el cuadro completo">
+    <img src="{{ n.url }}" alt="Placa detectada que el OCR no pudo leer" class="max-h-full max-w-full object-contain">
+  </a>
+  <div class="min-w-[180px] flex-1 text-[13px]">
+    <p class="font-semibold">{{ n.motivo }}</p>
+    <p class="font-mono text-xs text-text-muted">{{ n.ancho }} px de ancho · {{ n.lecturas }} lectura{{ n.lecturas|pluralize }}{% if n.sugerencia %} · el OCR leyó «{{ n.sugerencia }}»{% endif %}</p>
+    {% if error %}<p class="mt-1 flex items-center gap-1.5 text-danger">{% lucide "circle-x" size=14 %} {{ error }}</p>{% endif %}
+  </div>
+  <div class="ml-auto flex gap-2">
+    <label class="sr-only" for="placa-{{ n.token }}">Placa</label>
+    <input id="placa-{{ n.token }}" name="placa" value="{{ valor|default:n.sugerencia }}" maxlength="7" placeholder="ABC-123" required
+           class="input w-32 font-mono uppercase {% if error %}input-error{% endif %}">
+    <button class="btn btn-primary">{% lucide "check" size=16 %} Registrar</button>
+  </div>
+</form>

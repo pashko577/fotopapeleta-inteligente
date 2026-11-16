@@ -1,0 +1,64 @@
+{% extends "panel/base_panel.html" %}
+{% block pagina %}Captura en vivo{% endblock %}
+{% block miga %}Captura en vivo{% endblock %}
+{% block contenido %}
+<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="text-[28px] leading-tight font-semibold">Captura en vivo</h1>
+    <p class="mt-1 text-text-secondary">{{ activas }} de {{ tarjetas|length }} cámaras con capturas en los últimos 5 minutos · {{ hoy|miles }} evento{{ hoy|pluralize }} recibido{{ hoy|pluralize }} hoy</p>
+  </div>
+  <a href="{% url 'panel:captura_celular' %}" class="btn btn-secondary">{% lucide "smartphone" size=16 %} Abrir página de captura</a>
+</div>
+
+{# Estado del worker de percepción #}
+<section class="card mt-6 flex flex-col gap-4 p-4 lg:flex-row lg:items-center" data-tour="worker">
+  <div class="flex flex-1 items-center gap-3">
+    <span class="flex size-10 flex-none items-center justify-center rounded-lg {% if worker_en_linea %}bg-success-subtle text-success{% else %}bg-neutral-subtle text-text-secondary{% endif %}">{% lucide "cpu" size=20 %}</span>
+    <div>
+      <p class="font-semibold">{% if worker_en_linea %}Worker de percepción en línea{% else %}Worker de percepción sin eventos recientes{% endif %}</p>
+      <p class="font-mono text-xs text-text-secondary">{% for k, v in ultima.modelo.items %}{{ v }}{% if not forloop.last %} · {% endif %}{% empty %}{% if ultima %}El último evento no informó la versión de los modelos{% else %}Aún no se recibieron eventos{% endif %}{% endfor %}</p>
+    </div>
+  </div>
+  <dl class="grid grid-cols-3 gap-6">
+    <div><dt class="text-xs text-text-secondary">Fuentes activas</dt><dd class="font-mono text-base font-semibold">{{ activas }} de {{ tarjetas|length }}</dd></div>
+    <div><dt class="text-xs text-text-secondary">Eventos hoy</dt><dd class="font-mono text-base font-semibold">{{ hoy|miles }}</dd></div>
+    <div><dt class="text-xs text-text-secondary">Último evento</dt><dd class="font-mono text-base font-semibold">{{ ultima.recibido|hora }}</dd></div>
+  </dl>
+</section>
+
+<div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+  <div class="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3" data-tour="tarjetas">
+    {% for t in tarjetas %}
+    <article class="card overflow-hidden {% if t.estado == 'offline' %}border-danger{% endif %}">
+      <div class="relative aspect-[16/10] bg-surface-sunken">
+        {% if t.estado == 'offline' %}
+          <div class="flex size-full flex-col items-center justify-center gap-2 text-danger">{% lucide "wifi-off" size=28 %}<span class="font-semibold text-text">Desactivada</span></div>
+        {% elif t.imagen %}
+          <img src="{{ t.imagen }}" alt="Última captura de {{ t.cam.codigo }}" class="size-full object-cover">
+        {% else %}
+          <div class="flex size-full flex-col items-center justify-center gap-2 text-text-muted">{% lucide "cctv" size=28 %}<span class="text-[13px]">Sin capturas todavía</span></div>
+        {% endif %}
+        {% if t.estado == 'online' %}<span class="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#0F172AB3] px-2.5 py-1 text-[11px] font-semibold tracking-wider text-white"><span class="size-1.5 rounded-full bg-accent"></span>EN VIVO</span>{% endif %}
+      </div>
+      <div class="flex items-center justify-between gap-3 p-3">
+        <div class="min-w-0">
+          <p class="font-mono text-[13px] font-semibold">{{ t.cam.codigo }}</p>
+          <p class="truncate text-xs {% if t.estado == 'offline' %}text-danger{% else %}text-text-secondary{% endif %}">{{ t.cam.nombre }}{% if t.ultima %} · {{ t.ultima.timestamp|hora }}{% endif %}</p>
+        </div>
+        {% if t.ultima %}{% placa_sm t.ultima.placa %}{% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <section class="card card-pad self-start" data-tour="lecturas">
+    <div class="flex items-center justify-between">
+      <h2 class="text-xl font-semibold">Lecturas recientes</h2>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-text px-2.5 py-1 text-[11px] font-semibold tracking-wider text-surface"><span class="size-1.5 rounded-full bg-accent"></span>CADA 5 s</span>
+    </div>
+    <div hx-get="{% url 'panel:lecturas' %}" hx-trigger="every 5s [!document.hidden]" hx-swap="innerHTML">
+      {% include "panel/parciales/lecturas.html" %}
+    </div>
+  </section>
+</div>
+{% endblock %}

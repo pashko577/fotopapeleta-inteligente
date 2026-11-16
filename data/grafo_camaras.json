@@ -1,0 +1,20 @@
+{
+  "version": "2026-10-15",
+  "nota": "Coordenadas x_km/y_km proyectadas y esquemáticas. Reemplazar por lat/lon reales (Google Maps / OSM).",
+  "nodos": {
+    "AV-01": {"nombre": "Av. Javier Prado", "x_km": 0.0, "y_km": 0.0},
+    "AV-08": {"nombre": "Av. Arequipa", "x_km": 2.9, "y_km": 0.0},
+    "AV-15": {"nombre": "Av. Angamos", "x_km": 7.2, "y_km": 0.0},
+    "AV-02": {"nombre": "Av. Salaverry", "x_km": 0.0, "y_km": -2.0},
+    "AV-12": {"nombre": "Av. Brasil", "x_km": 2.9, "y_km": -3.6},
+    "PN-04": {"nombre": "Panamericana Norte", "x_km": 8.5, "y_km": -5.5}
+  },
+  "aristas": [
+    {"de": "AV-01", "a": "AV-08", "km": 3.0, "min": 4, "limite_kmh": 60, "dirigida": false},
+    {"de": "AV-01", "a": "AV-02", "km": 2.1, "min": 3, "limite_kmh": 60, "dirigida": false},
+    {"de": "AV-08", "a": "AV-15", "km": 4.5, "min": 6, "limite_kmh": 60, "dirigida": false},
+    {"de": "AV-08", "a": "AV-12", "km": 3.8, "min": 5, "limite_kmh": 60, "dirigida": false},
+    {"de": "AV-02", "a": "AV-12", "km": 5.2, "min": 7, "limite_kmh": 60, "dirigida": false},
+    {"de": "AV-12", "a": "PN-04", "km": 6.0, "min": 8, "limite_kmh": 60, "dirigida": false}
+  ]
+}

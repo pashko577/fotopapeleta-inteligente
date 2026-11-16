@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}{% block pagina %}Panel{% endblock %} · FotoPapeleta{% endblock %}
+{% block body_class %}min-h-dvh bg-bg{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/driver.css' %}"><script defer src="{% static 'vendor/driver.js' %}"></script>{% block head_extra %}{% endblock %}{% endblock %}
+{% block cuerpo %}
+{# En validación la sidebar arranca colapsada (72 px) para dar espacio a la evidencia, como en el prototipo #}
+<div x-data="{ menu: false, colapsada: {% if seccion == 'validacion' %}true{% else %}fpPrefs.leer('sidebar', false){% endif %} }"
+     {% if seccion != 'validacion' %}x-init="$watch('colapsada', v => fpPrefs.guardar('sidebar', v))"{% endif %} class="flex min-h-dvh">
+
+  {# Sidebar: 256 px / 72 px colapsada; drawer en tablet y móvil #}
+  <div x-show="menu" x-cloak x-transition.opacity class="fixed inset-0 z-40 bg-overlay lg:hidden" @click="menu = false"></div>
+  <aside data-tour="menu" class="fixed inset-y-0 left-0 z-40 flex w-[280px] flex-none flex-col border-r border-border bg-surface transition-transform duration-200 lg:sticky lg:top-0 lg:z-10 lg:h-dvh lg:translate-x-0"
+         :class="[menu ? 'translate-x-0' : '-translate-x-full', colapsada ? 'lg:w-[72px]' : 'lg:w-64']" aria-label="Navegación principal">
+    <div class="flex h-16 flex-none items-center justify-between px-4" :class="colapsada && 'lg:justify-center lg:px-0'">
+      <a href="{% url 'panel:resumen' %}" :class="colapsada && 'lg:[&_.leading-tight]:hidden'">{% include "componentes/marca.html" %}</a>
+      <button type="button" class="btn btn-ghost btn-icon lg:hidden" @click="menu = false" aria-label="Cerrar menú">{% lucide "x" size=20 %}</button>
+    </div>
+    <nav class="flex-1 overflow-y-auto px-3 pb-4">
+      {% for grupo, items in nav %}
+        <p class="rotulo mt-4 mb-1 px-3 text-text-muted" :class="colapsada && 'lg:hidden'">{{ grupo }}</p>
+        <div class="hidden h-px bg-border lg:mx-2 lg:my-3" :class="colapsada && 'lg:block'"></div>
+        {% for nombre, url, icono, clave in items %}
+          <a href="{{ url }}" title="{{ nombre }}"
+             class="relative mb-0.5 flex h-10 items-center gap-3 rounded-md px-3 {% if seccion == clave %}bg-primary-subtle font-semibold text-primary-text before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-full before:bg-primary{% else %}text-text-secondary hover:bg-surface-muted hover:text-text{% endif %}"
+             :class="colapsada && 'lg:justify-center lg:px-0'" {% if seccion == clave %}aria-current="page"{% endif %}>
+            {% lucide icono size=20 %}
+            <span class="flex-1" :class="colapsada && 'lg:hidden'">{{ nombre }}</span>
+            {% if clave == "validacion" and cola_pendientes %}<span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-white" :class="colapsada && 'lg:absolute lg:top-0.5 lg:right-1.5'">{{ cola_pendientes }}</span>{% endif %}
+          </a>
+        {% endfor %}
+      {% endfor %}
+    </nav>
+    <div class="flex flex-none items-center gap-3 border-t border-border p-4" :class="colapsada && 'lg:flex-col lg:px-2'">
+      <span class="flex size-9 flex-none items-center justify-center rounded-full bg-primary-subtle text-xs font-semibold text-primary-text">{{ user|iniciales }}</span>
+      <div class="min-w-0 flex-1 leading-tight" :class="colapsada && 'lg:hidden'">
+        <p class="truncate text-[13px] font-semibold">{{ user.get_full_name|default:user.username }}</p>
+        <p class="text-xs text-text-muted">{{ user|rol }}</p>
+      </div>
+      <button type="button" class="btn btn-ghost btn-icon btn-sm max-lg:hidden" @click="colapsada = !colapsada" :aria-label="colapsada ? 'Expandir menú' : 'Colapsar menú'" :title="colapsada ? 'Expandir menú' : 'Colapsar menú'">
+        <span x-show="!colapsada">{% lucide "panel-left-close" size=18 %}</span><span x-show="colapsada" x-cloak>{% lucide "panel-left-open" size=18 %}</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    {% if modo_demo %}
+    <div x-data="{ ver: !sessionStorage.getItem('fp-demo-oculto') }" x-show="ver" class="flex min-h-11 items-center gap-3 bg-info-subtle px-4 text-info sm:px-8">
+      {% lucide "info" size=18 %}
+      <p class="flex-1 py-2 text-[13px] text-text">Modo demostración: los eventos provienen de la demo con fotos públicas y de envíos de prueba a la API.</p>
+      <button type="button" class="text-info hover:text-text" @click="ver = false; sessionStorage.setItem('fp-demo-oculto', 1)" aria-label="Cerrar aviso">{% lucide "x" size=16 %}</button>
+    </div>
+    {% endif %}
+
+    {# Topbar 64 px #}
+    <header class="sticky top-0 z-30 flex h-16 flex-none items-center gap-2 border-b border-border bg-surface px-4 sm:gap-3 sm:px-8">
+      <button type="button" class="btn btn-ghost btn-icon -ml-2 lg:hidden" @click="menu = true" aria-label="Abrir menú">{% lucide "menu" size=20 %}</button>
+      <nav aria-label="Ruta" class="flex min-w-0 items-center gap-2 text-text-secondary">
+        <a href="{% url 'panel:resumen' %}" class="hover:text-text max-sm:hidden">Panel</a>
+        <span class="max-sm:hidden">{% lucide "chevron-right" size=14 %}</span>
+        {% block migas %}<span class="truncate font-semibold text-text">{% block miga %}{% endblock %}</span>{% endblock %}
+      </nav>
+      <div class="flex-1"></div>
+      <form action="{% url 'panel:buscar' %}" method="get" role="search" class="relative max-md:hidden" data-tour="buscar">
+        <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-muted">{% lucide "search" size=16 %}</span>
+        <input id="busqueda-global" name="q" type="search" placeholder="Buscar placa, cámara o ID" aria-label="Buscar placa, cámara o ID"
+               class="h-10 w-72 rounded-md border border-transparent bg-surface-muted pr-16 pl-9 placeholder:text-text-muted focus:border-primary focus:bg-surface focus:outline-none xl:w-80">
+        <span class="kbd pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 border border-border !bg-surface text-[11px] text-text-muted">Ctrl K</span>
+      </form>
+      <span data-tour="worker" class="flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold max-sm:hidden {% if worker_en_linea %}bg-success-subtle text-success{% else %}bg-neutral-subtle text-text-secondary{% endif %}"
+            title="{% if worker_ultimo %}Último evento recibido: {{ worker_ultimo|fecha_hora }}{% else %}Aún no se recibió ningún evento{% endif %}">
+        {% lucide "radio" size=16 %}{% if worker_en_linea %} Worker en línea{% else %} Worker sin eventos{% if worker_ultimo %} · {{ worker_ultimo|hace }}{% endif %}{% endif %}
+      </span>
+
+      {# Notificaciones: alertas de captura imposible pendientes de revisión #}
+      <div x-data="{ abierto: false }" class="relative" @keydown.escape="abierto = false">
+        <button type="button" data-tour="notificaciones" class="btn btn-ghost btn-icon relative" @click="abierto = !abierto" aria-label="Notificaciones" title="Notificaciones" :aria-expanded="abierto">
+          {% lucide "bell" size=20 %}
+          {% if alertas_total %}<span class="absolute top-2 right-2.5 size-2 rounded-full bg-danger-solid ring-2 ring-surface"></span>{% endif %}
+        </button>
+        <div x-show="abierto" x-cloak x-transition.opacity @click.outside="abierto = false" class="card fixed inset-x-4 top-16 z-20 shadow-elev-2 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[380px]">
+          <div class="flex items-center justify-between border-b border-border px-4 py-3">
+            <p class="font-semibold">Notificaciones</p>
+            {% if alertas_total %}<span class="text-xs text-text-muted">{{ alertas_total }} sin revisar</span>{% endif %}
+          </div>
+          {% for a in alertas_abiertas %}
+            <div class="flex gap-3 border-b border-border px-4 py-3 last:border-0">
+              <span class="mt-0.5 text-warning">{% lucide "triangle-alert" size=18 %}</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-[13px]"><span class="font-semibold">Captura imposible</span> · {% placa_sm a.placa %}</p>
+                <p class="mt-1 text-xs text-text-secondary">{{ a.detalle.de }} → {{ a.detalle.a }}: exigiría {{ a.detalle.velocidad_necesaria_kmh|num:0 }} km/h. Posible placa clonada o error de lectura.</p>
+                <form method="post" action="{% url 'panel:alerta_revisada' a.pk %}" class="mt-1">{% csrf_token %}
+                  <input type="hidden" name="volver" value="{{ request.get_full_path }}">
+                  <button class="text-xs font-semibold text-primary-text hover:underline">Marcar como revisada</button>
+                </form>
+              </div>
+              <span class="text-xs whitespace-nowrap text-text-muted">{{ a.creada|hace }}</span>
+            </div>
+          {% empty %}
+            <div class="flex flex-col items-center px-4 py-8 text-center text-text-secondary"><span class="mb-2 text-text-muted">{% lucide "bell" size=24 %}</span>Sin notificaciones pendientes.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button type="button" data-tour="ayuda" class="btn btn-ghost btn-icon" onclick="fpTutorial(true)" aria-label="Guía de esta pantalla" title="Guía de esta pantalla">{% lucide "circle-question-mark" size=20 %}</button>
+      <button type="button" class="btn btn-ghost btn-icon" x-data @click="$store.prefs.alternarTema()" aria-label="Cambiar tema" title="Cambiar tema">
+        <span class="dark:hidden">{% lucide "moon" size=20 %}</span><span class="hidden dark:inline">{% lucide "sun" size=20 %}</span>
+      </button>
+
+      {# Menú de usuario #}
+      <div x-data="{ abierto: false }" class="relative" @keydown.escape="abierto = false">
+        <button type="button" @click="abierto = !abierto" class="flex size-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white" aria-label="Menú de usuario" :aria-expanded="abierto">{{ user|iniciales }}</button>
+        <div x-show="abierto" x-cloak x-transition.opacity @click.outside="abierto = false" class="card absolute right-0 z-20 mt-2 w-64 py-1 shadow-elev-2">
+          <div class="border-b border-border px-4 py-3">
+            <p class="font-semibold">{{ user.get_full_name|default:user.username }}</p>
+            <p class="truncate text-xs text-text-muted">{{ user.email|default:user.username }} · {{ user|rol }}</p>
+          </div>
+          <a href="{% url 'portal:consulta' %}" class="flex h-9 items-center gap-2 px-4 hover:bg-surface-muted">{% lucide "external-link" size=16 %} Portal ciudadano</a>
+          <button type="button" onclick="fpTutorial(true)" class="flex h-9 w-full items-center gap-2 px-4 hover:bg-surface-muted">{% lucide "circle-question-mark" size=16 %} Guía de esta pantalla</button>
+          <form method="post" action="{% url 'panel:tutorial_reiniciar' %}">{% csrf_token %}
+            <button class="flex h-9 w-full items-center gap-2 px-4 hover:bg-surface-muted">{% lucide "rotate-ccw" size=16 %} Volver a ver todas las guías</button>
+          </form>
+          {% if user.is_staff %}<a href="{% url 'admin:index' %}" class="flex h-9 items-center gap-2 px-4 hover:bg-surface-muted">{% lucide "shield" size=16 %} Administración Django</a>{% endif %}
+          <div class="my-1 h-px bg-border"></div>
+          <form method="post" action="{% url 'panel:logout' %}">{% csrf_token %}
+            <button class="flex h-9 w-full items-center gap-2 px-4 text-danger hover:bg-surface-muted">{% lucide "log-out" size=16 %} Cerrar sesión</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    {% if seccion %}{% datos_tutorial %}{% endif %}
+    <main class="{% block main_class %}mx-auto w-full max-w-[1376px] flex-1 px-4 py-6 sm:px-8 sm:py-8{% endblock %}">
+      {% block contenido %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{
+  "entorno": {
+    "python": "3.12.10",
+    "networkx": "3.7",
+    "procesador": "AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD"
+  },
+  "P9_ms": {
+    "BFS": 0.0008,
+    "DFS": 0.0029,
+    "A*_h0": 0.0036,
+    "A*_recta": 0.0047
+  },
+  "P10": {
+    "camaras": 400,
+    "tramos": 760,
+    "consultas": 300,
+    "costos_correctos": 300,
+    "explorados_h0": 196.1,
+    "explorados_recta": 81.3,
+    "reduccion_pct": 58.5,
+    "ms_h0": 0.212,
+    "ms_recta": 0.126
+  }
+}

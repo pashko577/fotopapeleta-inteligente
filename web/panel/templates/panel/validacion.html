@@ -1,0 +1,238 @@
+{% extends "panel/base_panel.html" %}
+{% block pagina %}Validación{% endblock %}
+{% block migas %}
+  <a href="{% url 'panel:validacion' %}" class="font-semibold text-text {% if inf %}max-sm:hidden{% endif %}">Validación</a>
+  {% if inf %}<span class="max-sm:hidden">{% lucide "chevron-right" size=14 %}</span><span class="font-mono font-semibold text-text">{{ inf.codigo }}</span>{% endif %}
+{% endblock %}
+{% block main_class %}flex min-h-0 w-full flex-1{% endblock %}
+{% block contenido %}
+<div class="flex w-full flex-col xl:flex-row" x-data="{ cola: false, rechazar: false, escalar: false, corregir: false }"
+     @keydown.window="if (!$store.prefs.atajos || rechazar || escalar || corregir || ['INPUT','TEXTAREA','SELECT'].includes($event.target.tagName)) return;
+       const k = $event.key.toLowerCase();
+       if (k === 'a' && $refs.aprobar) { $event.preventDefault(); $refs.aprobar.requestSubmit(); }
+       if (k === 'r' && $refs.aprobar) { $event.preventDefault(); rechazar = true; }
+       if (k === 'e' && $refs.aprobar) { $event.preventDefault(); escalar = true; }">
+
+  {# 1 · Cola (320 px). En tablet y móvil, drawer #}
+  <div x-show="cola" x-cloak class="fixed inset-0 z-40 bg-overlay xl:hidden" @click="cola = false"></div>
+  <aside class="fixed inset-y-0 left-0 z-40 flex w-[320px] max-w-[88vw] flex-none -translate-x-full flex-col border-r border-border bg-surface transition-transform xl:static xl:z-0 xl:translate-x-0"
+         :class="cola && '!translate-x-0'" aria-label="Cola de validación" data-tour="cola">
+    <div class="border-b border-border p-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold">Cola de validación</h2>
+        <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-white">{{ cola|length }}</span>
+      </div>
+      <form method="get" class="mt-3">
+        <label for="orden" class="field-label">Ordenar por</label>
+        <select id="orden" name="orden" class="input" onchange="this.form.submit()">
+          {% for v, n in ordenes %}<option value="{{ v }}" {% if v == orden %}selected{% endif %}>{{ n }}</option>{% endfor %}
+        </select>
+      </form>
+    </div>
+    {# Se refresca cada 15 s si la preferencia «Actualizar la cola automáticamente» está activa #}
+    <ul id="lista-cola" class="flex-1 overflow-y-auto p-2" hx-get="{{ request.get_full_path }}" hx-select="#lista-cola" hx-swap="outerHTML"
+        hx-trigger="every 15s [Alpine.store('prefs').autoCola && !document.hidden]">
+      {% for f in cola %}
+        <li><a href="{% url 'panel:validacion_detalle' f.inf.pk %}{% if orden != 'antiguas' %}?orden={{ orden }}{% endif %}"
+               class="mb-1 block rounded-lg border p-3 {% if f.inf.pk == inf.pk %}border-primary bg-primary-subtle{% else %}border-transparent hover:bg-surface-muted{% endif %}" {% if f.inf.pk == inf.pk %}aria-current="true"{% endif %}>
+          <div class="flex items-center justify-between gap-2">
+            {% placa_sm f.inf.placa f.verificar %}
+            <span class="text-xs text-text-muted">{{ f.inf.creada|hace }}</span>
+          </div>
+          <p class="mt-2 flex items-center gap-2 text-[13px]">{% icono_tipo f.inf.tipo 14 %} {{ f.inf.tipo|nombre_tipo }}{% if f.inf.escalada %} <span class="ml-auto">{% badge_estado "escalada" %}</span>{% endif %}</p>
+          <p class="mt-1 text-xs text-text-muted">{{ f.camara.codigo }} · confianza {{ f.confianza|pct }}</p>
+        </a></li>
+      {% endfor %}
+    </ul>
+  </aside>
+
+  {% if not inf %}
+    <div class="flex flex-1 items-center justify-center p-6">
+      <div class="card w-full max-w-lg">
+        {% url 'panel:infracciones' as url_inf %}
+        {% include "componentes/vacio.html" with icono="shield-check" titulo="No hay infracciones pendientes" texto="Cuando el sistema detecte una nueva infracción aparecerá aquí para su revisión." accion_url=url_inf accion_texto="Ver infracciones decididas" accion_icono="history" %}
+      </div>
+    </div>
+  {% else %}
+  {# 2 · Evidencia (región dominante) #}
+  <section class="flex min-w-0 flex-1 flex-col px-4 pt-5 pb-4 sm:px-6">
+    <div class="flex flex-wrap items-start gap-3">
+      <button type="button" class="btn btn-secondary btn-sm xl:hidden" @click="cola = true">{% lucide "list" size=16 %} Cola ({{ cola|length }})</button>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-3">
+          <h1 class="font-mono text-[22px] font-semibold">{{ inf.codigo }}</h1>
+          {% badge_estado inf.estado %}{% if inf.escalada %}{% badge_estado "escalada" %}{% endif %}
+        </div>
+        <p class="mt-0.5 text-text-secondary">{{ inf.tipo|nombre_tipo }} · detectada el {{ inf.creada|fecha_hora }}</p>
+      </div>
+      {% if posicion %}
+      <div class="flex items-center gap-1 text-[13px] text-text-secondary">
+        <a {% if anterior %}href="{% url 'panel:validacion_detalle' anterior %}"{% endif %} class="btn btn-ghost btn-icon btn-sm {% if not anterior %}pointer-events-none opacity-40{% endif %}" aria-label="Anterior">{% lucide "chevron-left" size=18 %}</a>
+        {{ posicion }} de {{ total }}
+        <a {% if siguiente %}href="{% url 'panel:validacion_detalle' siguiente %}"{% endif %} class="btn btn-ghost btn-icon btn-sm {% if not siguiente %}pointer-events-none opacity-40{% endif %}" aria-label="Siguiente">{% lucide "chevron-right" size=18 %}</a>
+      </div>
+      {% endif %}
+    </div>
+
+    {# Pestañas: una por cámara donde apareció la placa #}
+    <div class="mt-3 flex gap-1 overflow-x-auto border-b border-border" role="tablist" data-tour="pestanas">
+      {% for c in capturas %}
+        <a href="?c={{ c.pk }}{% if orden != 'antiguas' %}&orden={{ orden }}{% endif %}" role="tab" aria-selected="{% if c == activa %}true{% else %}false{% endif %}"
+           class="-mb-px flex h-10 flex-none items-center gap-2 border-b-2 px-3 font-mono text-[13px] {% if c == activa %}border-primary font-semibold text-primary-text{% else %}border-transparent text-text-secondary hover:text-text{% endif %}">
+          {% lucide "cctv" size=16 %} {{ c.camara_id }} · {{ c.timestamp|hora }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <div class="mt-4 flex-1" data-tour="evidencia">
+      <div class="relative aspect-video overflow-hidden rounded-xl bg-surface-sunken">
+        {% if img_activa %}<img src="{{ img_activa }}" alt="Captura de {{ activa.placa|placa }} en {{ activa.camara_id }}, {{ activa.timestamp|fecha_hora }}" class="size-full object-contain">
+        {% else %}<div class="flex size-full flex-col items-center justify-center gap-2 text-text-muted">{% lucide "image-off" size=40 %}Imagen no disponible</div>{% endif %}
+        <div class="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-x-5 gap-y-1 bg-[#0F172AB3] px-4 py-2.5 text-[13px] text-white">
+          <span class="inline-flex items-center gap-1.5">{% lucide "cctv" size=16 %} {{ activa.camara_id }} · {{ activa.camara.nombre }}</span>
+          <span class="inline-flex items-center gap-1.5 font-mono">{% lucide "clock-3" size=16 %} {{ activa.timestamp|fecha_hora }}</span>
+          <span class="inline-flex items-center gap-1.5 font-mono">{% lucide "scan-text" size=16 %} OCR {{ activa.placa_confianza|pct }} · {{ activa.lecturas_votadas }} de {{ activa.lecturas_totales }} lecturas</span>
+        </div>
+        {% if img_activa %}<a href="{{ img_activa }}" download class="btn btn-secondary btn-icon btn-sm absolute top-3 left-3 shadow-elev-2" aria-label="Descargar imagen" title="Descargar imagen">{% lucide "download" size=16 %}</a>{% endif %}
+      </div>
+      <div class="mt-3 flex gap-3 overflow-x-auto">
+        {% for c, url, placa_url in miniaturas %}
+          <a href="?c={{ c.pk }}" class="flex-none" title="{{ c.camara_id }} · {{ c.timestamp|hora }}">
+            <span class="block h-[58px] w-[92px] overflow-hidden rounded-md border-2 bg-surface-sunken {% if c == activa %}border-primary{% else %}border-transparent{% endif %}">{% if url %}<img src="{{ url }}" alt="" class="size-full object-cover">{% endif %}</span>
+          </a>
+          {% if placa_url %}<a href="{{ placa_url }}" target="_blank" class="flex-none" title="Recorte de la placa en {{ c.camara_id }}">
+            <span class="flex h-[58px] w-[92px] items-center overflow-hidden rounded-md border-2 border-transparent bg-surface-sunken"><img src="{{ placa_url }}" alt="Recorte de la placa en {{ c.camara_id }}" class="w-full object-contain"></span>
+          </a>{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Barra de decisión fija abajo #}
+    {% if en_cola and puede_validar %}
+    <div data-tour="decision" class="sticky bottom-0 z-10 mt-4 -mx-4 flex flex-wrap justify-end gap-3 border-t border-border bg-surface p-3 sm:mx-0 sm:rounded-xl sm:border sm:shadow-elev-3">
+      <button type="button" class="btn btn-danger btn-lg max-sm:flex-1" @click="rechazar = true">{% lucide "x" size=18 %} Rechazar <span class="kbd" x-show="$store.prefs.atajos">R</span></button>
+      <button type="button" class="btn btn-secondary btn-lg max-sm:flex-1" @click="escalar = true">{% lucide "flag" size=18 %} Escalar <span class="kbd" x-show="$store.prefs.atajos">E</span></button>
+      <form method="post" action="{% url 'panel:decidir' inf.pk %}" x-ref="aprobar" class="max-sm:w-full">{% csrf_token %}
+        <input type="hidden" name="decision" value="aprobar"><input type="hidden" name="orden" value="{{ orden }}">
+        <input type="hidden" name="placa_corregida" :value="$store.correccion || ''">
+        <button class="btn btn-success btn-lg w-full">{% lucide "check" size=18 %} Aprobar <span class="kbd" x-show="$store.prefs.atajos">A</span></button>
+      </form>
+    </div>
+    {% elif not puede_validar %}
+      <div class="mt-4">{% include "componentes/banner.html" with tipo="warning" titulo="Tu rol no permite validar infracciones" texto="Puedes revisar la evidencia, pero la decisión la toma un validador." %}</div>
+    {% else %}
+      <div class="mt-4">{% include "componentes/banner.html" with tipo="info" texto="Esta infracción ya fue decidida." %}</div>
+    {% endif %}
+  </section>
+
+  {# 3 · Datos y análisis (400 px) #}
+  <aside class="flex-none border-t border-border bg-surface px-5 py-5 xl:w-[400px] xl:overflow-y-auto xl:border-t-0 xl:border-l" x-data="{ placa: '{{ inf.placa|placa }}' }">
+    <div data-tour="placa">
+    <p class="rotulo flex items-center gap-2 text-text-muted">{% lucide "scan-text" size=14 %} Placa detectada</p>
+    <div class="mt-3 flex items-center gap-4">
+      {% placa_grande inf.placa "md" %}
+      <div class="text-[13px]">
+        <p class="font-semibold">{{ activa.lecturas_votadas }} de {{ activa.lecturas_totales }} lecturas · {{ activa.placa_confianza|pct }}</p>
+        <p class="text-xs text-text-muted">{% if inf.coincidencia == "a_verificar" %}Coincidencia «a verificar» entre cámaras{% else %}Misma placa confirmada en {{ capturas|length }} cámaras{% endif %}</p>
+      </div>
+    </div>
+    {% if en_cola and puede_validar %}
+    <div class="mt-3">
+      <button type="button" x-show="!corregir" @click="corregir = true; $nextTick(() => $refs.placa.focus())" class="btn btn-ghost btn-sm -ml-3">{% lucide "pencil" size=16 %} Corregir placa</button>
+      <div x-show="corregir" x-cloak class="flex items-end gap-2">
+        <div class="flex-1"><label class="field-label" for="placa-corregida">Placa correcta</label>
+          <input id="placa-corregida" x-ref="placa" x-model="placa" maxlength="8" class="input font-mono uppercase" @keydown.enter.prevent="$store.correccion = placa; corregir = false"></div>
+        <button type="button" class="btn btn-primary" @click="$store.correccion = placa; corregir = false">Usar</button>
+        <button type="button" class="btn btn-ghost btn-icon" @click="corregir = false; placa = '{{ inf.placa|placa }}'; $store.correccion = ''" aria-label="Cancelar">{% lucide "x" size=16 %}</button>
+      </div>
+      <p x-show="$store.correccion" x-cloak class="mt-2 flex items-center gap-1.5 text-[13px] text-warning">{% lucide "pencil" size=14 %} Se aprobará con la placa <span class="font-mono font-semibold" x-text="$store.correccion"></span></p>
+    </div>
+    {% endif %}
+
+    </div>
+    <p class="rotulo mt-6 flex items-center gap-2 text-text-muted">{% lucide "info" size=14 %} Datos del evento</p>
+    <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13px]">
+      <dt class="text-text-secondary">Cámara origen</dt><dd class="text-right">{{ capturas.0.camara_id }} · {{ capturas.0.camara.nombre }}</dd>
+      <dt class="text-text-secondary">Captura</dt><dd class="text-right font-mono">{{ capturas.0.timestamp|fecha_hora }}</dd>
+      {% for c in capturas|slice:"1:" %}<dt class="text-text-secondary">Reaparición</dt><dd class="text-right font-mono">{{ c.camara_id }} · {{ c.timestamp|hora }}</dd>{% endfor %}
+      <dt class="text-text-secondary">Modelos</dt><dd class="text-right text-xs">{% for k, v in activa.modelo.items %}{{ v }}{% if not forloop.last %}<br>{% endif %}{% empty %}—{% endfor %}</dd>
+    </dl>
+
+    {% if analisis %}
+    <div data-tour="analisis">
+    <p class="rotulo mt-6 flex items-center gap-2 text-text-muted">{% lucide "waypoints" size=14 %} Análisis del grafo</p>
+    <div class="mt-2 rounded-lg bg-surface-sunken p-1">{% include "componentes/grafo.html" with g=mini_grafo compacto=True %}</div>
+    <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13px]">
+      <dt class="text-text-secondary">Ruta mínima (A*)</dt><dd class="text-right font-mono">{{ analisis.ruta|join:" → " }} · {{ analisis.km|num }} km</dd>
+      <dt class="text-text-secondary">Tiempo entre capturas</dt><dd class="text-right font-mono">{{ analisis.segundos|floatformat:0 }} s + {{ analisis.error_reloj_s|num:0 }}×2 s</dd>
+      <dt class="text-text-secondary">Velocidad medida</dt><dd class="text-right font-mono">{{ analisis.v_medida|num }} km/h</dd>
+      <dt class="text-text-secondary">Velocidad conservadora</dt><dd class="text-right font-mono">{{ analisis.v_conservadora|num }} km/h</dd>
+      <dt class="text-text-secondary">Límite de la vía</dt><dd class="text-right font-mono">{{ analisis.limite|num:0 }} km/h</dd>
+      <dt class="text-text-secondary">Exceso</dt><dd class="text-right font-mono font-semibold text-danger">+{{ analisis.exceso|num }} km/h</dd>
+      <dt class="text-text-secondary">Versión del grafo</dt><dd class="text-right font-mono text-xs">{{ analisis.version_grafo }}</dd>
+    </dl>
+    <div class="mt-4 flex gap-3 rounded-lg border-l-4 border-danger bg-danger-subtle p-3 text-[13px]">
+      <span class="text-danger">{% lucide "gauge" size=18 %}</span>
+      <p>Supera el límite más la tolerancia de {{ analisis.tolerancia_kmh|num:0 }} km/h, aun con la distancia mínima y el tiempo máximo.</p>
+    </div>
+    </div>
+    {% endif %}
+
+    {% if otras %}
+    <p class="rotulo mt-6 flex items-center gap-2 text-text-muted">{% lucide "cctv" size=14 %} Otras capturas de la placa</p>
+    <ul class="mt-2 flex flex-col gap-1.5 text-[13px]">
+      {% for o in otras %}<li class="flex justify-between"><span>{{ o.camara_id }} · {{ o.camara.nombre }}</span><span class="font-mono text-text-muted">{{ o.timestamp|fecha_hora }}</span></li>{% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if validaciones %}
+    <p class="rotulo mt-6 flex items-center gap-2 text-text-muted">{% lucide "history" size=14 %} Decisiones previas</p>
+    <ul class="mt-2 flex flex-col gap-2 text-[13px]">
+      {% for v in validaciones %}<li><span class="font-semibold">{{ v.get_decision_display }}</span> · {{ v.validador|nombre_corto }} · <span class="font-mono text-xs text-text-muted">{{ v.fecha|fecha_hora }}</span>{% if v.motivo %}<p class="text-text-secondary">{{ v.motivo }}</p>{% endif %}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    <a href="{% url 'panel:infraccion' inf.pk %}" class="btn btn-ghost btn-sm mt-6 -ml-3">{% lucide "external-link" size=16 %} Ver detalle y auditoría</a>
+  </aside>
+
+  {# Modal Rechazar: motivo obligatorio #}
+  <div x-show="rechazar" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @keydown.escape.window="rechazar = false">
+    <form method="post" action="{% url 'panel:decidir' inf.pk %}" class="w-full max-w-[520px] rounded-2xl bg-surface shadow-elev-4" @click.outside="rechazar = false" role="dialog" aria-labelledby="titulo-rechazo">
+      {% csrf_token %}<input type="hidden" name="decision" value="rechazar"><input type="hidden" name="orden" value="{{ orden }}">
+      <div class="flex gap-4 border-b border-border p-6">
+        <span class="flex size-11 flex-none items-center justify-center rounded-full bg-danger-subtle text-danger">{% lucide "circle-x" size=22 %}</span>
+        <div class="flex-1"><h2 id="titulo-rechazo" class="text-xl font-semibold">Rechazar {{ inf.codigo }}</h2><p class="mt-1 text-text-secondary">La infracción no se emitirá. El motivo queda registrado en la auditoría.</p></div>
+        <button type="button" class="btn btn-ghost btn-icon" @click="rechazar = false" aria-label="Cerrar">{% lucide "x" size=18 %}</button>
+      </div>
+      <div class="flex flex-col gap-4 p-6">
+        <div><label class="field-label" for="motivo-rechazo">Motivo del rechazo</label>
+          <select id="motivo-rechazo" name="motivo" class="input">{% for m in motivos_rechazo %}<option>{{ m }}</option>{% endfor %}</select></div>
+        <div><label class="field-label" for="comentario-rechazo">Comentario (obligatorio)</label>
+          <textarea id="comentario-rechazo" name="comentario" rows="3" required class="input resize-none" x-effect="rechazar && $nextTick(() => $el.focus())"></textarea></div>
+      </div>
+      <div class="flex justify-end gap-3 rounded-b-2xl border-t border-border bg-surface-muted px-6 py-4">
+        <button type="button" class="btn btn-secondary" @click="rechazar = false">Cancelar</button>
+        <button class="btn btn-danger">{% lucide "x" size=16 %} Rechazar infracción</button>
+      </div>
+    </form>
+  </div>
+
+  {# Modal Escalar #}
+  <div x-show="escalar" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @keydown.escape.window="escalar = false">
+    <form method="post" action="{% url 'panel:decidir' inf.pk %}" class="w-full max-w-[520px] rounded-2xl bg-surface shadow-elev-4" @click.outside="escalar = false" role="dialog" aria-labelledby="titulo-escalar">
+      {% csrf_token %}<input type="hidden" name="decision" value="escalar"><input type="hidden" name="orden" value="{{ orden }}">
+      <div class="flex gap-4 border-b border-border p-6">
+        <span class="flex size-11 flex-none items-center justify-center rounded-full bg-warning-subtle text-warning">{% lucide "flag" size=22 %}</span>
+        <div class="flex-1"><h2 id="titulo-escalar" class="text-xl font-semibold">Escalar {{ inf.codigo }}</h2><p class="mt-1 text-text-secondary">Queda en la cola marcada para que un administrador la decida.</p></div>
+        <button type="button" class="btn btn-ghost btn-icon" @click="escalar = false" aria-label="Cerrar">{% lucide "x" size=18 %}</button>
+      </div>
+      <div class="p-6"><label class="field-label" for="motivo-escalar">¿Qué duda tienes?</label>
+        <textarea id="motivo-escalar" name="motivo" rows="3" required class="input resize-none" x-effect="escalar && $nextTick(() => $el.focus())"></textarea></div>
+      <div class="flex justify-end gap-3 rounded-b-2xl border-t border-border bg-surface-muted px-6 py-4">
+        <button type="button" class="btn btn-secondary" @click="escalar = false">Cancelar</button>
+        <button class="btn btn-primary">{% lucide "flag" size=16 %} Escalar</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
